@@ -4,7 +4,7 @@ Proposal
 
 # Basic Information
 
-**  Project Title: **  How to survive on road.
+**Project Title:**  How to survive on road.
 
 **Team Members:**
 
@@ -50,7 +50,7 @@ As the data needed are separated in several documents, join manipulation might b
 # Visualization Design
 The layout logic of this project is an “question-answer-display-scroll down-question” way to show how to “survive” on road. Our design is a straight scroll down layout, the left ⅖ part is for descriptive part, the right ⅗ part is for visualization part.
 
-### Alternative design
+## Alternative design
 ![alter1](img/alter1.png)
 
 ![alter2](img/alter2.png)
@@ -61,43 +61,43 @@ The layout logic of this project is an “question-answer-display-scroll down-qu
 
 ![alter5](img/alter5.png)
 
-### Final Design
+## Final Design
 We keep the absorbing user information idea and website layout from Boya design. For the visualizations display relationship between key factors and traffic fatalities, we mainly choose the idea from Yuting when considering weather and bad behavior and heatmap idea from Caidan when considering daily commute mode.
 
 The tradeoff here is that as we encourage users to participate in the the exploration process without involving complex interactions and address straight and concise information, much data will be abandoned.
 
-#### First part
+### First part
 
 A general perspective of 2015 U.S. traffic fatalities will be provided.
 
-### Statistics Over Years
+#### Statistics Over Years
 
 - Show the trend of number of traffic fatalities over recent years with the dot of 2015 twinkling.
 - Display the proportion of different types of crashes (based on level of fatalities) occurred in 2015 by clicking the twinkling dot in above chart.
 
-#### Second Part
+### Second Part
 Interactive part for users to exploring how to survive on road will based on their own information.
 
-### Statistics by State
+#### Statistics by State
 - Display the number of (fatal/non-fatal) crashes happened in each state in bar charts
 - The user will be asked to select where he/she lives in text part.
 - The bar of the selected state by user will be highlighted.
 - The highlight part will ask user to click that bar.
 - A pie chart will be displayed with detailed information of a state by clicking the bar of this state.
 
-### Statistics by Commute Mode
+#### Statistics by Commute Mode
 - From the pie chart above, display the difference between different travel modes, by divide in more detail dimension.
 - The text part will ask people to choose one daily commute mode.
 - The pie will shrinkage and move in left side and a heat map will show.
 - Show the number of traffic fatalities in the chosen travel way in a calendar heatmap (given a state, given a traffic mode, a 7 * 24 grid, each grid represent the fatalities).
 - When choose other commute mode on pie slice, the heat map will change.
 
-### Statistics by Weather
+#### Statistics by Weather
 - Display the trend of traffic fatalities(given a state) over the time of day by weather.
 - By clicking the weather category that user is interested, other trends will be blurred.
 - The reason why we chose line chart instead of radial bar chart to display traffic fatality trends overtime by weather, is that the data has around 10 weather categories, which is a burden for bar chart.
 
-### Statistics by Behavioral Factors
+#### Statistics by Behavioral Factors
 - Three paired-chosen button are provided which representing three bad behaviors (speeding, distracting and without seat belt), and the default option is the best alternative: no speeding, no distracting and with seat belt.
 - The traffic fatalities with the best behaviors displayed in the background as a benchmark.
 - Display the number of traffic fatalities over time (weekdays) under the chosen conditions in a bar chart. The conditions can be combined.
