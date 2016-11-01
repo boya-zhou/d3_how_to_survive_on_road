@@ -70,7 +70,7 @@ The tradeoff here is that as we encourage users to participate in the the explor
 
 A general perspective of 2015 U.S. traffic fatalities will be provided.
 
-** - Statistics Over Years **
+### Statistics Over Years
 
 - Show the trend of number of traffic fatalities over recent years with the dot of 2015 twinkling.
 - Display the proportion of different types of crashes (based on level of fatalities) occurred in 2015 by clicking the twinkling dot in above chart.
@@ -78,26 +78,26 @@ A general perspective of 2015 U.S. traffic fatalities will be provided.
 #### Second Part
 Interactive part for users to exploring how to survive on road will based on their own information.
 
-** - Statistics by State **
+### Statistics by State
 - Display the number of (fatal/non-fatal) crashes happened in each state in bar charts
 - The user will be asked to select where he/she lives in text part.
 - The bar of the selected state by user will be highlighted.
 - The highlight part will ask user to click that bar.
 - A pie chart will be displayed with detailed information of a state by clicking the bar of this state.
 
-** - Statistics by Commute Mode **
+### Statistics by Commute Mode
 - From the pie chart above, display the difference between different travel modes, by divide in more detail dimension.
 - The text part will ask people to choose one daily commute mode.
 - The pie will shrinkage and move in left side and a heat map will show.
 - Show the number of traffic fatalities in the chosen travel way in a calendar heatmap (given a state, given a traffic mode, a 7 * 24 grid, each grid represent the fatalities).
 - When choose other commute mode on pie slice, the heat map will change.
 
-** - Statistics by Weather **
+### Statistics by Weather
 - Display the trend of traffic fatalities(given a state) over the time of day by weather.
 - By clicking the weather category that user is interested, other trends will be blurred.
 - The reason why we chose line chart instead of radial bar chart to display traffic fatality trends overtime by weather, is that the data has around 10 weather categories, which is a burden for bar chart.
 
-** - Statistics by Behavioral Factors **
+### Statistics by Behavioral Factors
 - Three paired-chosen button are provided which representing three bad behaviors (speeding, distracting and without seat belt), and the default option is the best alternative: no speeding, no distracting and with seat belt.
 - The traffic fatalities with the best behaviors displayed in the background as a benchmark.
 - Display the number of traffic fatalities over time (weekdays) under the chosen conditions in a bar chart. The conditions can be combined.
@@ -115,7 +115,8 @@ Interactive part for users to exploring how to survive on road will based on the
 
 
 # Must-Have Features
- ### Discover
+
+### Discover
 - Give users a general perspective of traffic fatalities in 2015 by time, state, etc.
 
 ### Sense of participation
