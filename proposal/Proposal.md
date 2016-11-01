@@ -53,13 +53,13 @@ The layout logic of this project is an “question-answer-display-scroll down-qu
 ### Alternative design
 ![alter1](img/alter1.png)
 
-![alter2](/img/alter2.png)
+![alter2](img/alter2.png)
 
-![alter3](/img/alter3.png)
+![alter3](img/alter3.png)
 
-![alter4](/img/alter4.png)
+![alter4](img/alter4.png)
 
-![alter5](/img/alter5.png)
+![alter5](img/alter5.png)
 
 ### Final Design
 We keep the absorbing user information idea and website layout from Boya design. For the visualizations display relationship between key factors and traffic fatalities, we mainly choose the idea from Yuting when considering weather and bad behavior and heatmap idea from Caidan when considering daily commute mode.
@@ -103,11 +103,11 @@ Interactive part for users to exploring how to survive on road will based on the
 - Display the number of traffic fatalities over time (weekdays) under the chosen conditions in a bar chart. The conditions can be combined.
 - The design of condition combination can show the additive impacts of behavioral factors.
 
-![final1](/img/final1.png)
+![final1](img/final1.png)
 
-![final2](/img/final2.png)
+![final2](img/final2.png)
 
-![final3](/img/final3.png)
+![final3](img/final3.png)
 
 
 
