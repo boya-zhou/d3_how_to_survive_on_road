@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>How to Survive on Road?</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="/style/style.css">
+</head>
+<body>
+    <script src="/JS/jquery-3.1.1.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <script src="/JS/script.js"></script>
+    <div id="warper">
+        <svg id="byYear" height="400" width="1000"></svg>
+        <div id="typeDiv">
+            <svg id="byTypePie" height="500" width="1000"></svg>
+            <svg id="byTypeHeatmap" height="450" width="1000"></svg>
+        </div>
+        <div id="weatherDiv">
+            <div id="sidebar-weather">
+                Weather:
+                <select id="weatherVar" onchange="highlightLine()">
+                    <option value="0" selected="selected">
+                        No Additional Atmospheric Conditions
+                    </option>
+                    <option value="1">Clear</option>
+                    <option value="2">Rain</option>
+                    <option value="3">Sleet, Hail</option>
+                    <option value="4">Snow</option>
+                    <option value="5">Fog, Smog, Smoke</option>
+                    <option value="10">Cloudy</option>
+                </select>
+            </div>
+            <div id="svg-weather">
+                <svg id="byWeather" height="400" width="800"></svg>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
