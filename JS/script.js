@@ -284,7 +284,9 @@ function byType() {
                              .attr("class", "arcsType")
                              .attr("id", function(d) { return 'type'+d.data.key; })
                              .attr("d", arcType)
-                             .style("fill", function(d) { return colorPie(d.data.key); });
+                             .style("fill", function(d) { return colorPie(d.data.key); })
+                             .on("mouseover", function() { return mouseOver(this.id.slice(4) - 1); })
+                             .on("mouseout", function() { return mouseOut(this.id.slice(4) - 1); });
 
 
 
@@ -320,7 +322,6 @@ function byType() {
         var arcsLvl = svgPie.selectAll(".arcsLvl");
 
         dataNest2.forEach(function(d, i) {
-
             arcsLvl.data(d.values)
                    .enter()
                    .append("path")
@@ -349,6 +350,7 @@ function byType() {
 
         
         /************************** Heatmap: for the chosen vehicle type *************************/
+        function fatalHeatMap() {
         var dataNest3 = d3.nest()
                           .key(function(d) { return d.BODY_TYP2; })
                           .key(function(d) { return d.day; })
@@ -357,49 +359,34 @@ function byType() {
                               return d3.sum(d, function(v) { return v.count; });
                           })
                           .entries(data);
-        //console.log(dataNest3[0]);
-        var subDataNest3 = dataNest3[0];
-
 
         var colorHeatmap = d3.scale.quantile()
                              .domain([0, buckets-1, 250])
                              .range(colors);
 
-        var cards = svgHeatmap.selectAll(".hour")
-                              //.data(dataNest3[0], function(d) { return d.day+':'+d.hour; })
-                              .data(dataNest3[0].values).enter();
-
-        //cards.append("title");
-
-        dataNest3[0].values.forEach(function(d, i) {
-            //console.log(d);
-            //console.log(d.key);
-            //console.log(d.values);
-            d.values.forEach(function(g, id) {
-                cards.append("rect")
-                     .attr("x", g.key * gridSize)
-                     .attr("y", (d.key - 1) * gridSize)
+        dataNest3.forEach(function(d, i) {     
+            d.values.forEach(function(g, ii) {
+                g.values.forEach(function(v, iii) {
+                    svgHeatmap.selectAll("hour-bordered-" + i)
+                     .data(d.values)
+                     .enter()
+                     .append("rect")
+                     .attr("x", v.key * gridSize)
+                     .attr("y", (g.key - 1) * gridSize)
                      .attr("rx", 4)
                      .attr("ry", 4)
-                     .attr("class", "hour bordered")
-                     .attr("width", gridSize)
-                     .attr("height", gridSize)
-                     .style("fill", colorHeatmap(g.values));
-
+                     .attr("class", "hour-bordered-" + i)
+                     .attr("width", gridSize-1)
+                     .attr("height", gridSize-1)
+                     .style("fill", colorHeatmap(v.values))
+                     .style("opacity", 0);
+                });
             });
-
         });
-             
-
-        
-
-        //cards.select("title").text(function(d) { return d.value; });
-
-        //cards.exit().remove();
 
         // Define the legend
         var legend = svgHeatmap.selectAll(".legend")
-                            .data(["<=25", "<=50", "<=75", "<=100", "<=150", "<=175", "<=200", "<=225", "<=250"])
+                            .data([25, 50, 75, 100, 150, 175, 200, 225, 250])
                             .enter()
                             .append("g")
                             .attr("class", "legend");
@@ -413,11 +400,49 @@ function byType() {
 
         legend.append("text")
                  .attr("class", "mono")
-                 .text(function(d) { return "≥ " + Math.round(d); })
-                 .attr("x", function(d, i) { return legendElementWidth * i; })
+                 .text(function(d) { return "<= " + d; })
+                 .attr("x", function(d, i) { return legendElementWidth * (i+1)-15; })
                  .attr("y", height + 50 + gridSize);
 
-           //legend.exit().remove();
+        };
+
+        fatalHeatMap();
+
+        function highlightMap(index) {
+            d3.selectAll(".hour-bordered-" + index)
+              .transition()
+              .duration(500)
+              .style("opacity", 1);
+        };
+
+        function blurMap(index) {
+            d3.selectAll(".hour-bordered-" + index)
+              .transition()
+              .duration(500)
+              .style("opacity", 0);
+        };
+
+        highlightMap(1);
+
+        function mouseOver(index) {
+
+            if (index == 1) { return highlightMap(1); }
+            else {
+                blurMap(1);
+                highlightMap(index);
+            }
+        }
+
+        function mouseOut(index) {
+
+            if (index == 1) { return highlightMap(1); }
+            else {
+                blurMap(index);
+                highlightMap(1);
+            }
+
+        };
+
     });
 
 };
