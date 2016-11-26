@@ -1,0 +1,48 @@
+div.tooltip-year {
+    position: absolute;
+    text-align: center;
+    width: 60px;
+    height: 28px;
+    padding: 2px;
+    color: #ffffff;
+    font: 12px Consolas, courier;
+    background: #1abc9c;
+    border: 5px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+div.tooltip-type {
+    background: #eee;                                             
+    box-shadow: 0 0 5px #999999;                                  
+    color: #333;                                                  
+    display: none;                                                  
+    font-size: 12px;
+    font-family: Consolas, courier;
+    padding: 10px;                                                  
+    position: absolute;                                             
+    text-align: center;                                             
+    top: 95px;
+    z-index: 10;  
+}
+
+rect.bordered {
+    stroke: #E6E6E6;
+    stroke-width:2px;
+}
+
+text {
+    font-size: 9pt;
+    font-family: Consolas, courier;
+    fill: #000000;
+}
+
+.axis {
+    fill: none;
+    stroke: #000000;
+    shape-rendering: crispEdges;
+}
+
+#checkFatalLvl, #clickCircle {
+    cursor: pointer;
+}
