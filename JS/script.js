@@ -17,10 +17,10 @@ function byYear() {
         margin = {top: 30, right: 30, bottom: 30, left: 70};
 
     // Format date
-    var date = d3.time.format("%y").parse;
+    var date = d3.time.format("%Y").parse;
 
     // Set the range
-    var xScale = d3.scale.linear().range([0, width]).nice();
+    var xScale = d3.time.scale().range([0, width]);
     var yScale = d3.scale.linear().range([height, 0]).nice();
 
     // Define the axis
@@ -35,7 +35,7 @@ function byYear() {
                       .x(function(d) { return xScale(d.year); })
                       .y(function(d) { return yScale(d.death); });   
 
-    var svg = d3.select("svg")
+    var svg = d3.select("#byYear")
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -48,7 +48,7 @@ function byYear() {
     d3.csv("data/byYear.csv", function(err, data) {
         
         data.forEach(function(d) {
-            d.year = +d.Year;
+            d.year = +date(d.Year);
             d.death = +d.Deaths;
             d.pop = +d.Population;
         });
@@ -71,20 +71,20 @@ function byYear() {
            .enter()
            .append("circle")
            .attr("r", function(d) {
-               if (d.year === 2015) { return 6; }
+               if (d.Year == 2015) { return 6; }
                else { return 3; };
            })
            .attr("cx", function(d) { return xScale(d.year); })
            .attr("cy", function(d) { return yScale(d.death); })
            .attr("fill", function(d) {
-               if (d.year === 2015) { return "#1abc9c"; }
+               if (d.Year == 2015) { return "#1abc9c"; }
                else { return "gray"};
            })
            .on("mouseenter", function() {
                d3.select(this)
                  .transition()
                  .attr("r", function(d) {
-                     if (d.year === 2015) { return 9; }
+                     if (d.Year == 2015) { return 9; }
                      else { return 6; };
                  });
            })
@@ -92,7 +92,7 @@ function byYear() {
                d3.select(this)
                  .transition()
                  .attr("r", function(d) {
-                     if (d.year === 2015) { return 6; }
+                     if (d.Year == 2015) { return 6; }
                      else { return 3; };
                  });
            })
@@ -100,7 +100,7 @@ function byYear() {
                tip.transition()
                   .duration(200)
                   .style("opacity", 0.8);
-               tip.html("<b>" + d.year + "</b><br/>" + d.death)
+               tip.html("<b>" + d.Year + "</b><br/>" + d.death)
                   .style("left", (d3.event.pageX - 30) + "px")
                   .style("top", (d3.event.pageY - 40) + "px");
            })
@@ -110,34 +110,22 @@ function byYear() {
                   .style("opacity", 0);
            })
            .on("click", function(d) {
-               if (d.year === 2015) {
+               if (d.Year == 2015) {
                    return pie2015();
                };
            });
 
         // Add the X Axis
         svg.append("g")
-           .attr("class", "x-axis")
+           .attr("class", "axis")
            .attr("transform", "translate(0, " + height + ")")
            .call(xAxis);
 
         // Add the Y Axis
         svg.append("g")
-           .attr("class", "y-aixs")
+           .attr("class", "axis")
            .call(yAxis);
         
-        // 2015 Dot flickering method
-        function flicker(duration) {
-            d3.selectAll("dot")
-              .transition()
-              .duration(duration)
-              .tween("attr:r", function(d) {
-                  if (d.year === 2015) { return 8; }
-                  // else { return 3; }
-              });
-
-            setTimeout(flicker(duration), (Math.random() + 1) * duration);
-        };
     });
 };
 
@@ -151,9 +139,7 @@ function pie2015() {
             d.fatal = d.FATAL;
             d.count = +d.COUNT;
         });
-
-        console.log(data);
-
+        
         var pie = d3.layout.pie()
                     .sort(null)
                     .value(function(d) { return d.count; });
@@ -162,7 +148,7 @@ function pie2015() {
             width = 400;
 
         var outerRadius = width/2 - 50,
-            innerRadius = 0;
+            innerRadius = 50;
         
         var arc = d3.svg.arc()
                     .innerRadius(innerRadius)
@@ -170,7 +156,9 @@ function pie2015() {
 
         var svg = d3.select("svg");
 
-        var color = d3.scale.category20();
+        var color = d3.scale.ordinal()
+                      .domain(["1", "2", ">2"])
+                      .range(["#c7e9b4", "#41b6c4", "#081d58"]);
 
         // Set up groups
         var arcs = svg.selectAll("g.arc")
@@ -209,8 +197,12 @@ function byType() {
         legendElementWidth = gridSize*2,
         buckets = 10,
         colors = ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58", "#000000"], // alternatively colorbrewer.YlGnBu[9]
+        colorsPie = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6"],
+        colorsFatal = ["#c7e9b4", "#41b6c4", "#081d58"],
         days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
-        times = ["1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12a", "1p", "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p", "10p", "11p", "12p"];
+        times = ["1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12a", "1p", "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p", "10p", "11p", "12p"],
+        vehicleType = ["Sedan/Hardtop/2-Door Coupe", "Utility", "Van", "Light Vehicle", "Other", "Truck"],
+        fatalNum = ["1", "2", ">2"];
 
 
     var svgHeatmap = d3.select("#byTypeHeatmap")
@@ -248,14 +240,14 @@ function byType() {
             d.count = +d.FATAL_COUNT
         });
 
+
+
+        /**************** Pie charts: for vehicle type with different level of fatality  *********************/
         var dataNest1 = d3.nest()
                           .key(function(d) { return d.BODY_TYP2; })
                           .rollup(function(i) { return i.length; })
                           .entries(data);
 
-
-
-        /**************** Pie charts: for vehicle type with different level of fatality  *********************/
         var svgPie = d3.select("#byTypePie")
                        .append("g")
                        .attr("transform", "translate(" + (radius+4*margin.left) + "," + (radius+4*margin.top) + ")");
@@ -263,7 +255,7 @@ function byType() {
         //var colorPie = d3.scale.category20();
         var colorPie = d3.scale.ordinal()
                          .domain(["1", "2", "3", "4", "6", "7"])
-                         .range(["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6"]);
+                         .range(colorsPie);
     
         // Arc for vehicle type
         var arcType = d3.svg.arc()
@@ -277,6 +269,14 @@ function byType() {
 
         var pie1 = pieType(dataNest1);
 
+        var tip = d3.select("body")
+                    .append("div")
+                    .attr("class", "tooltip-type");
+
+        var typeScale = d3.scale.ordinal()
+                          .domain(["1", "2", "3", "4", "5", "6"])
+                          .range(vehicleType);
+
         var arcsType = svgPie.selectAll(".arcsType")
                              .data(pieType(dataNest1))
                              .enter()
@@ -285,12 +285,46 @@ function byType() {
                              .attr("id", function(d) { return 'type'+d.data.key; })
                              .attr("d", arcType)
                              .style("fill", function(d) { return colorPie(d.data.key); })
-                             .on("mouseover", function() { return mouseOver(this.id.slice(4) - 1); })
-                             .on("mouseout", function() { return mouseOut(this.id.slice(4) - 1); });
+                             .on("mouseover", function(d) {
+                                 
+                                 var percent = d3.format(",.2%")((d.endAngle - d.startAngle) / 6.283185307179586);
+
+                                 tip.html("<b>" + typeScale(d.data.key) + "</b><br/>" + d.value + "<br/>" + percent)
+                                    .style('top', (d3.event.pageY + 10) + 'px')
+                                    .style('left', (d3.event.pageX + 10) + 'px')
+                                    .style("display", "block");
+
+                                 mouseOver(this.id.slice(4) - 1);
+
+                                })
+                             .on("mouseout", function(d) {
+                                 tip.style("display", "none");
+                                 return mouseOut(this.id.slice(4) - 1);
+                                });
+        
+        var legendPie = svgPie.selectAll(".legend-pie")
+                              .data(vehicleType)
+                              .enter()
+                              .append("g")
+                              .attr("class", "legend-pie");
+        
+        legendPie.append("rect")
+                 .attr("x", width / 4 + 50)
+                 .attr("y", function(d, i) { return i * 25 - 150; })
+                 .attr("height", 20)
+                 .attr("width", 30)
+                 .style("fill", function(d, i) { return colorsPie[i]; });
+
+        legendPie.append("text")
+                 .attr("class", "mono-pie")
+                 .text(function(d) { return d; })
+                 .attr("x", width / 4 + 90)
+                 .attr("y", function(d, i) { return i * 25 - 135; });
 
 
 
-        var colorLvl = d3.scale.ordinal().domain(["1", "2", ">2"]).range(["#c7e9b4", "#41b6c4", "#081d58"]);
+
+        var colorLvl = d3.scale.ordinal().domain(fatalNum).range(colorsFatal);
 
         var dataNest2 = d3.nest()
                          .key(function(d) { return d.BODY_TYP2; })
@@ -315,8 +349,8 @@ function byType() {
         var arcLvl = d3.svg.arc()
                         .startAngle(function(d) { return d.startAngle; })
                         .endAngle(function(d) { return d.endAngle; })
-                        .outerRadius(radius + 2*margin.top)
-                        .innerRadius(radius-5)
+                        .outerRadius(radius + 2 * margin.top)
+                        .innerRadius(radius - 5)
                         .padAngle(.005);
 
         var arcsLvl = svgPie.selectAll(".arcsLvl");
@@ -332,6 +366,27 @@ function byType() {
                    .style("opacity", 0);
         });
 
+        var legendFatal = svgPie.selectAll(".legend-fatal")
+                              .data(fatalNum)
+                              .enter()
+                              .append("g")
+                              .attr("class", "legend-fatal");
+        
+        legendFatal.append("rect")
+                 .attr("x", width / 4 + 50)
+                 .attr("y", function(d, i) { return i * 25 + 50; })
+                 .attr("height", 20)
+                 .attr("width", 30)
+                 .style("fill", function(d, i) { return colorsFatal[i]; });
+
+        legendFatal.append("text")
+                 .attr("class", "mono-pie")
+                 .text(function(d, i) { return "Traffic Death Toll: " + fatalNum[i]; })
+                 .attr("x", width / 4 + 90)
+                 .attr("y", function(d, i) { return i * 25 + 65; });
+        
+        legendFatal.style("display", "none");
+
         // Circle for clicking
         svgPie.append("circle")
            .attr("id", "checkFatalLvl")
@@ -340,17 +395,40 @@ function byType() {
            .attr("r",radius/3)
            .attr("fill", "white")
            .on("click", function() {
+
                d3.selectAll(".arcsLvl")
                  .transition()
                  .duration(1000)
                  .style("opacity", 0.7);
+
+               legendFatal.transition()
+                          .duration(1000)
+                          .delay(500)
+                          .style("display", "block");
            });
+
+        svgPie.append("text")
+              .text("CLICK!")
+              .attr("class", "clickCircle")
+              .attr("x", -30)
+              .attr("y", 7)
+              .style("font-size", 20 + "px")
+              .on("click", function() {
+                  d3.selectAll(".arcsLvl")
+                    .transition()
+                    .duration(1000)
+                    .style("opacity", 0.7);
+
+                  legendFatal.transition()
+                             .duration(1000)
+                             .delay(500)
+                             .style("display", "block");
+              });
 
 
 
         
         /************************** Heatmap: for the chosen vehicle type *************************/
-        function fatalHeatMap() {
         var dataNest3 = d3.nest()
                           .key(function(d) { return d.BODY_TYP2; })
                           .key(function(d) { return d.day; })
@@ -376,8 +454,8 @@ function byType() {
                      .attr("rx", 4)
                      .attr("ry", 4)
                      .attr("class", "hour-bordered-" + i)
-                     .attr("width", gridSize-1)
-                     .attr("height", gridSize-1)
+                     .attr("width", gridSize - 2)
+                     .attr("height", gridSize - 2)
                      .style("fill", colorHeatmap(v.values))
                      .style("opacity", 0);
                 });
@@ -385,28 +463,24 @@ function byType() {
         });
 
         // Define the legend
-        var legend = svgHeatmap.selectAll(".legend")
-                            .data([25, 50, 75, 100, 150, 175, 200, 225, 250])
+        var legendHeatmap = svgHeatmap.selectAll(".legend-heatmap")
+                            .data([25, 50, 75, 100, 125, 150, 175, 200, 225, 250])
                             .enter()
                             .append("g")
-                            .attr("class", "legend");
+                            .attr("class", "legend-heatmap");
 
-        legend.append("rect")
+        legendHeatmap.append("rect")
                   .attr("x", function(d, i) { return legendElementWidth * i; })
                   .attr("y", height + 50)
                   .attr("width", legendElementWidth)
                   .attr("height", gridSize / 2)
                   .style("fill", function(d, i) { return colors[i]; });
 
-        legend.append("text")
-                 .attr("class", "mono")
+        legendHeatmap.append("text")
+                 .attr("class", "mono-heatmap")
                  .text(function(d) { return "<= " + d; })
                  .attr("x", function(d, i) { return legendElementWidth * (i+1)-15; })
                  .attr("y", height + 50 + gridSize);
-
-        };
-
-        fatalHeatMap();
 
         function highlightMap(index) {
             d3.selectAll(".hour-bordered-" + index)
@@ -425,29 +499,24 @@ function byType() {
         highlightMap(1);
 
         function mouseOver(index) {
-
             if (index == 1) { return highlightMap(1); }
             else {
                 blurMap(1);
                 highlightMap(index);
             }
-        }
+        };
 
         function mouseOut(index) {
-
             if (index == 1) { return highlightMap(1); }
             else {
                 blurMap(index);
                 highlightMap(1);
             }
-
         };
 
     });
 
 };
-
-
 
 
 /* Statistics by Weather and Fatality Number */
@@ -493,8 +562,6 @@ function byWeather() {
         });
 
         // Group data by weather
-        // key: weather
-        // values: fatality counts
         var dataNest = d3.nest()
                          .key(function(d) { return d.weather; })
                          .key(function(d) { return d.hour; }).sortKeys(d3.ascending)
