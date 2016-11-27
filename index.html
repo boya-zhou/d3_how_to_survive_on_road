@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>How to Survive on Road?</title>
+	<meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/styleSection.css"/>
+</head>
+<body>
+
+<div class="container">
+    <div>
+      <section class = 'step' id = 'main-title'>
+        <div>How<br/><br/>To<br/><br/>Survive On<br/><br/>Road</div>
+      </section>
+    </div>
+
+    <section class="step row">
+      <div class="title col-lg-3">
+        In recent years, many safety actions helped decrease the number of traffic deaths. However, newly released government data point that the number of people who died in car accidents increase 7.2% over 2015.
+      </div>
+      <div class="col-lg-9">
+        <div class='vis'>
+            <svg id="byYear" height="400" width="1000"></svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="step row">
+      <div class="title col-lg-3" id = "state">
+        Here is a guide may help you avoid traffic danger.<br/><br/>First, let us know about you. Which state do you live?<br/><br/>
+      </div>
+      <div class="col-lg-9">
+        <div class='vis'>
+            <input type="text" placeholder="please enter the sate"  id="inputValue"/>
+            <input type="button" id="inputbutton" value="submit"/>
+            <div id="pieChart"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="step row">
+      <div class="title col-lg-3" id = "commute">
+        Next, which commute mode do you use the most often?<br/><br/>
+      </div>
+      <div class="col-lg-9">
+        <div class='vis'>
+            <div id="typeDiv">
+                <svg id="byTypePie" height="500" width="1000"></svg>
+                <svg id="byTypeHeatmap" height="450" width="1000"></svg>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="step row">
+      <div class="title col-lg-3" id = "weather">
+        Which kind of severe weather did you encounter most often in last two weeks?<br/><br/>
+      </div>
+      <div class="col-lg-9">
+        <div class='vis'>
+            <div id="weatherDiv">
+            <div id="sidebar-weather">
+                Weather:
+                <select id="weatherVar" onchange="highlightLine()">
+                    <option value="0" selected="selected">
+                        No Additional Atmospheric Conditions
+                    </option>
+                    <option value="1">Clear</option>
+                    <option value="2">Rain</option>
+                    <option value="3">Sleet, Hail</option>
+                    <option value="4">Snow</option>
+                    <option value="5">Fog, Smog, Smoke</option>
+                    <option value="10">Cloudy</option>
+                </select>
+            </div>
+            <div id="svg-weather">
+                <svg id="byWeather" height="400" width="800"></svg>
+            </div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="step row">
+      <div class="title col-lg-3" id = "badBehaviour">
+        text for bad behaviour<br/><br/>
+      </div>
+      <div class="col-lg-9">
+        <div class='vis'>
+            <p><input type="checkbox" name="category" id="checkbox1" value="distract" /> distract </p>   
+            <p><input type="checkbox" name="category" id="checkbox2" value="speeding" />speeding</p>   
+            <p><input id="btnOperate" type="button" value="choose" onclick="change_condition()" /></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="step row">
+      <div class="title col-lg-3" id = "end">
+        text for end<br/><br/>
+      </div>
+      <div class="col-lg-9">
+        <div id='vis'>
+        </div>
+      </div>
+    </section>
+    
+    <div id="extra-space">
+    </div>
+
+
+</div>
+<!-- all package -->
+<script src="https://d3js.org/d3.v3.min.js"></script>
+
+<!-- tingbao package -->
+<script src="js/jquery-3.1.1.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="js/script.js"></script>
+
+<!-- boya package -->
+<script src="js/sections.js"></script>
+
+<!-- caidan package -->
+<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script> -->
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script> -->
+<!-- <script src="http://libs.baidu.com/jquery/1.10.2/jquery.min.js"></script> -->
+<!-- <script src="js/d3pie.min.js"></script>
+<script src="js/merge.js"></script>
+<script src="js/distract.js"></script> -->
+
+</body>
+</html>
