@@ -47,8 +47,6 @@ function selectMenu(){
 	/*
 
 	need to change from other member
-
-	*/
 	var weather = ['rainy','snow','sunny'];
 
 	var weatherSelect = d3.select('#weather')
@@ -67,6 +65,8 @@ function selectMenu(){
 		var weatherState = d3.select('#weather-select').property('value');
 		console.log(weatherState);
 	};
+	*/
+
 };
 
 var scrollVis = function(){

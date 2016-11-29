@@ -4,6 +4,9 @@ $(document).ready(function() {
     byType();
     byWeather();
     highlightLine();
+    byState();
+    byBehavior(10);
+    
 
 });
 
@@ -623,4 +626,466 @@ function highlightLine() {
        .ease("linear")
        .attr("opacity", 1)
        .style("stroke-width", 7);
-}; 
+};
+
+
+
+/**********Statistic by state***********/
+function byState(){
+
+ arg1=0;
+ arg2=0;
+ arg3=0;
+ find_state=1;
+
+$('#inputbutton').click(function(){
+ 
+ arg1=0;
+ arg2=0;
+ arg3=0;
+ find_state=1;
+
+
+ //highlight the selected state
+var tem = $('#inputValue').val();
+ find_state=tem;
+ d3.selectAll("rect")
+     .style("fill", function(d,i) {
+         var tmp=find_state-1;
+         if(find_state==3 || find_state==7 || find_state==14 || find_state==43 || find_state==52)
+         return "#98abc5";
+         if(find_state>3)
+         tmp--;
+         if(find_state>7)
+         tmp--;
+         if(find_state>14 )
+        { tmp--;
+        }
+         if(find_state>43 )
+        { tmp--;
+        }
+         if(find_state>52 )
+        { tmp--;
+        }
+         if(i==tmp)
+          return "yellow";
+          else
+          return "#98abc5"; });
+
+
+     // do the pie chart
+    d3.csv("data/pie_chart1.csv",function(error,csvdata){  
+      
+        if(error){  
+            console.log("haha"+error);  
+        }  
+        
+		for( var i=0; i<csvdata.length; i++ ){  
+    var state = csvdata[i].STATE;  
+    var fatal_count = csvdata[i].FATAL_COUNT;  
+    var total_count = csvdata[i].TOTAL_COUNT;  
+
+
+				 if(state==find_state && fatal_count==1)
+				 arg1= total_count;
+				  if(state==find_state && fatal_count==2)
+				 arg2= total_count;
+				  if(state==find_state && ">2"==fatal_count)
+				 arg3= total_count;
+          
+    }
+	 console.log(arg1+"---"+arg2+"---"+arg3);
+
+	});  
+   
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x0 = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+var x1 = d3.scale.ordinal();
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var color = d3.scale.ordinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+var xAxis = d3.svg.axis()
+    .scale(x0)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickFormat(d3.format(".2s"));
+
+var svg = d3.select("div#bar_chart1").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.csv("data/bar_chart1.csv", function(error, data) {
+  if (error) throw error;
+   console.log(data);  
+
+  var ageNames = d3.keys(data[0]).filter(function(key) { return key !== "State"; });
+
+  data.forEach(function(d) {
+    d.ages = ageNames.map(function(name) { return {name: name, value: +d[name]}; });
+  });
+
+  x0.domain(data.map(function(d) { return d.State; }));
+  x1.domain(ageNames).rangeRoundBands([0, x0.rangeBand()]);
+  y.domain([0, d3.max(data, function(d) { return d3.max(d.ages, function(d) { return d.value; }); })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("FATAL_COUNT");
+
+   var state = svg.selectAll(".state")
+      .data(data)
+    .enter().append("g")
+      .attr("class", "state")
+      .attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; })
+      
+       .on('click',function(){
+      
+         
+      secondStep(parseInt(arg1),parseInt(arg2),parseInt(arg3));
+      });
+
+     state.selectAll("rect")
+      .data(function(d) { return d.ages; })
+    .enter()
+    .append("rect")
+      .attr("width", x1.rangeBand())
+      .attr("x", function(d) { return x1(d.name); })
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return height - y(d.value); })
+      .style("fill", function(d) { return color(d.name); })
+    
+     
+
+});
+
+
+
+
+
+
+function secondStep( arg1, arg2, arg3){
+console.log(arg1+"~~~"+arg2+"~~~"+arg3);
+
+var pie = new d3pie("pieChart", {
+	"header": {
+		"title": {
+			"text": "STATE "+find_state,
+			"fontSize": 24,
+			"font": "open sans"
+		},
+		"subtitle": {
+			"text": "the total fatal",
+			"color": "#999999",
+			"fontSize": 12,
+			"font": "open sans"
+		},
+		"titleSubtitlePadding": 9
+	},
+	"footer": {
+		"color": "#999999",
+		"fontSize": 10,
+		"font": "open sans",
+		"location": "bottom-left"
+	},
+	"size": {
+		"canvasWidth": 590,
+		"pieOuterRadius": "90%"
+	},
+	"data": {
+		"sortOrder": "value-desc",
+		"content": [
+			{
+				"label": "FATAL_COUNT=1",
+				"value": arg1,
+				"color": "#2484c1"
+			},
+			{
+				"label": "FATAL_COUNT=2",
+				"value": arg2,
+				"color": "#0c6197"
+			},
+			{
+				"label": "FATAL_COUNT>2",
+				"value": arg3,
+				"color": "#4daa4b"
+			}
+			
+		]
+	},
+	"labels": {
+		"outer": {
+			"pieDistance": 32
+		},
+		"inner": {
+			"hideWhenLessThanPercentage": 0
+		},
+		"mainLabel": {
+			"fontSize": 11
+		},
+		"percentage": {
+			"color": "#ffffff",
+			"decimalPlaces": 0
+		},
+		"value": {
+			"color": "#adadad",
+			"fontSize": 11
+		},
+		"lines": {
+			"enabled": true
+		},
+		"truncation": {
+			"enabled": true
+		}
+	},
+	"effects": {
+		"pullOutSegmentOnClick": {
+			"effect": "linear",
+			"speed": 400,
+			"size": 8
+		}
+	},
+	"misc": {
+		"gradient": {
+			"enabled": true,
+			"percentage": 100
+		}
+	}
+});
+
+
+}
+
+
+}
+
+
+function byBehavior(find_state){
+  dataset = new Array();
+  find_state=find_state;
+  var map1=new Array(); 
+  var map2=new Array(); 
+  var map3=new Array(); 
+  var map4=new Array(); 
+for(var i=0;i<57;i++){ 
+map1[i]=new Array(); 
+map2[i]=new Array();
+map3[i]=new Array();
+map4[i]=new Array();
+for(var j=0;j<8;j++){ 
+map1[i][j]=null;
+map2[i][j]=null;
+map3[i][j]=null;
+map4[i][j]=null;
+}
+}
+
+
+
+    d3.csv("data/behavior.csv",function(error,csvdata){  
+      
+        if(error){  
+            console.log(error);  
+        }  
+        
+		for( var i=1; i<csvdata.length; i++ ){  
+    var state = parseInt(csvdata[i].STATE);  
+    var fatals = parseInt(csvdata[i].FATALS);  
+    var day_week = parseInt(csvdata[i].DAY_WEEK); 
+    var mdrdstrd = parseInt(csvdata[i].MDRDSTRD);
+    var speedrel = parseInt(csvdata[i].SPEEDREL);
+   
+// whether the driver has distract or speeding
+    if(mdrdstrd==0 && speedrel ==0)          
+        map1[state][day_week]+= fatals;  
+    if(mdrdstrd!=0 && speedrel ==0)              
+        map2[state][day_week]+= fatals;    
+    if(mdrdstrd==0 && speedrel !=0)            
+        map3[state][day_week]+= fatals;  
+    if(mdrdstrd!=0 && speedrel !=0)             
+        map4[state][day_week]+= fatals;                           
+				
+          
+    }
+
+       for(var i=1;i<8;i++){ 
+dataset[i]=map1[find_state][i];
+    }
+
+showclass();
+	}); 
+
+
+$('#btnOperate').click(function(){
+  
+if(document.getElementById("checkbox1").checked==true && document.getElementById("checkbox2").checked==true){
+    console.log("checkbox1,2 is checked");
+        for(var i=1;i<8;i++){ 
+dataset[i]=map4[find_state][i];
+    }
+showclass();
+    
+}
+if(document.getElementById("checkbox1").checked==true && document.getElementById("checkbox2").checked==false){
+    console.log("checkbox1 is checked");
+        for(var i=1;i<8;i++){ 
+dataset[i]=map3[find_state][i];
+    }
+showclass();
+    
+}
+if(document.getElementById("checkbox1").checked==false && document.getElementById("checkbox2").checked==true){
+    console.log("checkbox2 is checked");
+        for(var i=1;i<8;i++){ 
+dataset[i]=map2[find_state][i];
+    }
+showclass();
+    
+}
+if(document.getElementById("checkbox1").checked==false && document.getElementById("checkbox2").checked==false){
+    console.log("checkbox1,2 is not checked");
+        for(var i=1;i<8;i++){ 
+dataset[i]=map1[find_state][i];
+    }
+showclass();
+    
+}
+
+    });
+
+
+
+function showclass(){
+
+
+	var width = 400;
+	var height = 400;
+
+	//add svg	
+	 svg = d3.select("div#bar_chart2")
+		.append("svg")
+		.attr("width", width)
+		.attr("height", height);
+
+	var padding = {left:30, right:30, top:20, bottom:20};
+
+	
+
+	var xScale = d3.scale.ordinal()
+		.domain(d3.range(dataset.length))
+		.rangeRoundBands([0, width - padding.left - padding.right]);
+
+
+	var yScale = d3.scale.linear()
+		.domain([0,d3.max(dataset)])
+		.range([height - padding.top - padding.bottom, 0]);
+
+	//define axis
+	var xAxis = d3.svg.axis()
+		.scale(xScale)
+		.orient("bottom");
+		
+	
+	var yAxis = d3.svg.axis()
+		.scale(yScale)
+		.orient("left");
+
+	//add rect
+	var rectPadding = 4;
+
+	var rects = svg.selectAll(".MyRect")
+		.data(dataset)
+		.enter()
+		.append("rect")
+		.attr("class","MyRect")
+		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+		.attr("x", function(d,i){
+			return xScale(i) + rectPadding/2;
+		} )
+		.attr("y",function(d){
+			return yScale(d);
+		})
+		.attr("width", xScale.rangeBand() - rectPadding )
+		.attr("height", function(d){
+			return height - padding.top - padding.bottom - yScale(d);
+		});
+
+	//add text
+	var texts = svg.selectAll(".MyText")
+		.data(dataset)
+		.enter()
+		.append("text")
+		.attr("class","MyText")
+		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+		.attr("x", function(d,i){
+			return xScale(i) + rectPadding/2;
+		} )
+		.attr("y",function(d){
+			return yScale(d);
+		})
+		.attr("dx",function(){
+			return (xScale.rangeBand() - rectPadding)/2;
+		})
+		.attr("dy",function(d){
+			return 20;
+		})
+		.text(function(d){
+			return d;
+		});
+
+	//add x-axis
+	svg.append("g")
+		.attr("class","axis")
+		.attr("transform","translate(" + padding.left + "," + (height - padding.bottom) + ")")
+		.call(xAxis); 
+		
+	//add y-axis
+	svg.append("g")
+		.attr("class","axis")
+		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+		.call(yAxis);
+
+
+}
+
+
+}
