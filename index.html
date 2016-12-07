@@ -20,8 +20,8 @@
         In recent years, many safety actions helped decrease the number of traffic deaths. However, newly released government data point that the number of people who died in car accidents increase 7.2% over 2015.
       </div>
       <div class="col-lg-9">
-        <div class='vis'>
-            <svg id="byYear" height="400" width="1000"></svg>
+        <div class='vis' id="vis-byYear">
+            <svg id="byYear" height="400" width="800"></svg>
         </div>
       </div>
     </section>
@@ -32,10 +32,6 @@
       </div>
       <div class="col-lg-9">
         <div class='vis'>
-            <div id="bar_chart1">   </div>
-            <input type="text" placeholder="please input the state" id="inputValue"/>
-            <input type="button" id="inputbutton" value="submit"/>
-            <div id="pieChart"></div>
         </div>
       </div>
     </section>
@@ -45,10 +41,8 @@
         Next, which commute mode do you use the most often?<br/><br/>
       </div>
       <div class="col-lg-9">
-        <div class='vis'>
+        <div class='vis' id="vis-byType">
             <div id="typeDiv">
-                <svg id="byTypePie" height="500" width="1000"></svg>
-                <svg id="byTypeHeatmap" height="450" width="1000"></svg>
             </div>
         </div>
       </div>
@@ -61,7 +55,7 @@
                 <select class= 'selectMenu' id="weatherVar" onchange="highlightLine()">
                     <option value="0" selected="selected">
                         <!-- No Additional Atmospheric Conditions -->
-                        No input
+                        -- Select Weather --
                     </option>
                     <option value="1">Clear</option>
                     <option value="2">Rain</option>
@@ -73,10 +67,9 @@
             </div>        
       </div>
       <div class="col-lg-9">
-        <div class='vis'>
+        <div class='vis' id="vis-byWeather">
             <div id="weatherDiv">
               <div id="svg-weather">
-                  <svg id="byWeather" height="400" width="800"></svg>
               </div>
             </div>
         </div>
@@ -88,11 +81,12 @@
         text for bad behaviour<br/><br/>
       </div>
       <div class="col-lg-9">
-        <div class='vis'>
-            <p><input type="checkbox" name="category" id="checkbox1" value="distract" />distract</p>   
-            <p><input type="checkbox" name="category" id="checkbox2" value="speeding" />speeding</p>   
-            <p><input id="btnOperate" type="button" value="submit"  /></p>
-            <div id="bar_chart2">   </div>
+        <div class='vis' id="vis-byBehave">
+            <p><input type="checkbox" name="category" id="checkbox1" value="distract" checked="checked"/>  speeding</p>   
+            <p><input type="checkbox" name="category" id="checkbox2" value="speeding" />  distracted</p>   
+            <p><input id="btnOperate" type="button" value="submit" /></p>
+            <div id="behaveDiv">
+            </div>
         </div>
       </div>
     </section>

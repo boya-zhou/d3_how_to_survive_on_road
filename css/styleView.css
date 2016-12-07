@@ -31,11 +31,6 @@ rect.bordered {
     stroke-width:2px;
 }
 
-text {
-    font-size: 9pt;
-    font-family: Consolas, courier;
-    fill: #000000;
-}
 
 .axis {
     fill: none;

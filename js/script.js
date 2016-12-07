@@ -1,12 +1,67 @@
 $(document).ready(function() {
 
     byYear();
-    byType();
-    byWeather();
-    highlightLine();
-    byState();
-    byBehavior(10);
-    
+
+    d3.csv("data/final0.csv", function(error, data) {
+
+        var formatDate = d3.time.format("%H");
+        var hourScale = d3.time.scale()
+                          .domain([formatDate.parse('0'), formatDate.parse('23')])
+                          .range([50, 650]);
+
+        data.forEach(function(d) {
+            d.day = +d.DAY_WEEK;
+            d.hour = +d.HOUR;
+            d.hourtime = formatDate.parse(d.HOUR);
+            d.hourScale = hourScale(formatDate.parse(d.HOUR));
+            d.count = +d.FATAL_COUNT;
+        });
+
+        byType(data);
+        byWeather(data);
+        byBehave(behave1=1, behave2=0, behaveData=data);
+
+        // Select state
+        var dataNestState = d3.nest()
+                              .key(function(d) { return d.STATE; })
+                              .entries(data);
+        d3.select("#state-select").on("change", changeState);
+        function changeState() {
+            // remove states that did not appear
+            var states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+            // adjust the scale
+            var stateScale = d3.scale.ordinal().domain(states).rangePoints([1, 50]);
+            var selectedState = stateScale(d3.select('#state-select').property('value'));
+            var stateResult = dataNestState.filter(function(d) { return d.key == selectedState; })[0].values;
+
+
+            // Select type
+            var dataNestType = d3.nest()
+                                 .key(function(d) { return d.BODY_TYP2; })
+                                 .entries(stateResult);
+            d3.select("#byTypePie").remove();
+            d3.select("#byTypeHeatmap").remove();
+            byType(stateResult);
+            d3.select("#commute-select").on("change", changeType);
+            function changeType() {
+                var vehicleType = ["Sedan/Hardtop/2-Door Coupe", "Utility", "Van", "Light Vehicle", "Other", "Truck"];
+                var selectType = vehicleType.indexOf(d3.select('#commute-select').property('value')) + 1;
+                var typeResult = dataNestType.filter(function(d) { return d.key == selectType; })[0].values;
+            };
+
+
+            // Select weather
+            d3.select("#byWeather").remove();
+            byWeather(stateResult);
+
+
+            // Select behavior
+            d3.select("#byBehave").remove();
+            byBehave(behave1=1, behave2=0, behaveData=stateResult);
+            
+        };
+
+    });
 
 });
 
@@ -16,7 +71,7 @@ $(document).ready(function() {
 function byYear() {
 
     var height = 340,
-        width = 570,
+        width = 670,
         margin = {top: 30, right: 30, bottom: 30, left: 70};
 
     // Format date
@@ -27,11 +82,8 @@ function byYear() {
     var yScale = d3.scale.linear().range([height, 0]).nice();
 
     // Define the axis
-    var xAxis = d3.svg.axis().scale(xScale)
-                             .orient("bottom")
-                             .ticks(5);
-    var yAxis = d3.svg.axis().scale(yScale)
-                             .orient("left");
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+    var yAxis = d3.svg.axis().scale(yScale).orient("left");
 
     // Define the line
     var valueLine = d3.svg.line()
@@ -42,7 +94,7 @@ function byYear() {
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var tip = d3.select("body")
+    var tip = d3.select("#vis-byYear")
                 .append("div")
                 .attr("class", "tooltip-year")
                 .style("opacity", 0);
@@ -55,6 +107,8 @@ function byYear() {
             d.death = +d.Deaths;
             d.pop = +d.Population;
         });
+
+        var dataZoomed = data.slice(109);
         
         // Scale the range of the data
         xScale.domain(d3.extent(data, function(d) { return d.year; }));
@@ -69,10 +123,11 @@ function byYear() {
            .attr("stroke-width", "2");
 
         // Add the scatterplot (dots)
-        svg.selectAll("dot")
+        svg.selectAll(".year-dot")
            .data(data)
            .enter()
            .append("circle")
+           .attr("class", "year-dot")
            .attr("r", function(d) {
                if (d.Year == 2015) { return 6; }
                else { return 3; };
@@ -114,89 +169,116 @@ function byYear() {
            })
            .on("click", function(d) {
                if (d.Year == 2015) {
-                   return pie2015();
+                   zoomIn();
+                   //return pie2015();
                };
            });
 
         // Add the X Axis
         svg.append("g")
            .attr("class", "axis")
+           .attr("id", "x-axis")
            .attr("transform", "translate(0, " + height + ")")
            .call(xAxis);
 
         // Add the Y Axis
         svg.append("g")
            .attr("class", "axis")
+           .attr("id", "y-axis")
            .call(yAxis);
+
+        function zoomIn() {
+            d3.selectAll(".year-dot").remove();
+
+            // First transition the line to the last six years
+            var t0 = svg.transition().duration(750);
+            t0.selectAll(".year-trend").attr("d", valueLine(dataZoomed));
+
+            // Then transition the x-axis
+            xScale.domain(d3.extent(dataZoomed, function(d) { return d.year; }));
+            yScale.domain(d3.extent(dataZoomed, function(d) { return d.death; }));
+            svg.selectAll(".year-dot2")
+               .data(dataZoomed)
+               .enter()
+               .append("circle")
+               .attr("class", "year-dot2")
+               .attr("r", function(d) {
+                   if (d.Year == 2015) { return 6; }
+                   else { return 3; };
+               })
+               .attr("cx", function(d) { return xScale(d.year); })
+               .attr("cy", function(d) { return yScale(d.death); })
+               .attr("fill", function(d) {
+                   if (d.Year == 2015) { return "#1abc9c"; }
+                   else { return "gray"};
+                })
+               .style("opacity", 0)
+               .on("mouseenter", function() {
+                    d3.select(this)
+                    .transition()
+                    .attr("r", function(d) {
+                        if (d.Year == 2015) { return 9; }
+                        else { return 6; };
+                    });
+                })
+                .on("mouseleave", function() {
+                    d3.select(this)
+                      .transition()
+                      .attr("r", function(d) {
+                          if (d.Year == 2015) { return 6; }
+                          else { return 3; };
+                       });
+                 })
+                 .on("mouseover", function(d) {
+                     tip.transition()
+                        .duration(200)
+                        .style("opacity", 0.8);
+                     tip.html("<b>" + d.Year + "</b><br/>" + d.death)
+                        .style("left", (d3.event.pageX - 30) + "px")
+                        .style("top", (d3.event.pageY - 40) + "px");
+                  })
+                  .on("mouseout", function(d) {
+                      tip.transition()
+                      .duration(500)
+                      .style("opacity", 0);
+                   });
+
+            var t1 = t0.transition();
+            t1.selectAll(".year-trend").attr("d", valueLine(dataZoomed));
+            t1.selectAll("#x-axis").call(xAxis);
+            t1.selectAll("#y-axis").call(yAxis);
+
+            // Third transition the dots
+            svg.selectAll(".year-dot2")
+               .transition()
+               .delay(750)
+               .duration(750)
+               .style("opacity", 1);
+
+        }
         
     });
 };
 
 
-/* Statistics over Years */
-function pie2015() {
-    // Load the data over years
-    d3.csv("data/severity2.csv", function(err, data) {
 
-        data.forEach(function(d) {
-            d.fatal = d.FATAL;
-            d.count = +d.COUNT;
-        });
-        
-        var pie = d3.layout.pie()
-                    .sort(null)
-                    .value(function(d) { return d.count; });
-
-        var height = 400,
-            width = 400;
-
-        var outerRadius = width/2 - 50,
-            innerRadius = 50;
-        
-        var arc = d3.svg.arc()
-                    .innerRadius(innerRadius)
-                    .outerRadius(outerRadius);
-
-        var svg = d3.select("svg");
-
-        var color = d3.scale.ordinal()
-                      .domain(["1", "2", ">2"])
-                      .range(["#c7e9b4", "#41b6c4", "#081d58"]);
-
-        // Set up groups
-        var arcs = svg.selectAll("g.arc")
-                      .data(pie(data))
-                      .enter()
-                      .append("g")
-                      .attr("class", "arc")
-                      .attr("transform", "translate(" + (670 + outerRadius) + "," + (outerRadius + 50) + ")");
-
-        // Draw arc paths
-        arcs.append("path")
-            .attr("class", "pie2015")
-            .attr("fill", function(d) { return color(d.data.fatal); })
-            .attr("d", arc);
-
-        // Define the labels
-        arcs.append("text")
-            .attr("transform", function(d) {
-                return "translate(" + arc.centroid(d) + ")";
-            })
-            .attr("text-archor", "middle")
-            .text(function(d) { return d.data.fatal; });
-
-    });
-};
+function byState() {
+    // some states did not appear in the dataset
+    // Pls remember to remove those statesName from section.js and
+    // states and stateScale in the main function in script.js
+}
 
 
 /* Statistics by Vehicle Type and Fatality Number */
-function byType() {
+function byType(typeDate) {
+
+    var data = (JSON.parse(JSON.stringify(typeDate)));
 
     var margin = { top: 30, right: 0, bottom: 100, left: 30 },
         width = 1000 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom,
-        radius = (400 - margin.top)/2.5;
-        gridSize = Math.floor(width / 24),
+        radius = (400 - margin.top)/3;
+        gridSize = Math.floor(width / 28),
         legendElementWidth = gridSize*2,
         buckets = 10,
         colors = ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58", "#000000"], // alternatively colorbrewer.YlGnBu[9]
@@ -208,7 +290,19 @@ function byType() {
         fatalNum = ["1", "2", ">2"];
 
 
-    var svgHeatmap = d3.select("#byTypeHeatmap")
+    var svgPie = d3.select("#typeDiv")
+                   .append("svg")
+                   .attr("id", "byTypePie")
+                   .attr("height", 400)
+                   .attr("width", 1000)
+                   .append("g")
+                   .attr("transform", "translate(" + (radius+3*margin.left) + "," + (radius+3*margin.top) + ")");
+    
+    var svgHeatmap = d3.select("#typeDiv")
+                       .append("svg")
+                       .attr("id", "byTypeHeatmap")
+                       .attr("height", 400)
+                       .attr("width", 1000)
                        .append("g")
                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -235,29 +329,16 @@ function byType() {
                         .attr("class", function(d, i) { return ((i >= 7 && i <= 16) ? "timeLabel mono axis axis-worktime" : "timeLabel mono axis"); });
 
 
-    d3.csv("data/type3.csv",function(error, data) {
-
-        data.forEach(function(d) {
-            d.day = +d.DAY_WEEK;
-            d.hour = +d.HOUR;
-            d.count = +d.FATAL_COUNT
-        });
-
-
 
         /**************** Pie charts: for vehicle type with different level of fatality  *********************/
         var dataNest1 = d3.nest()
                           .key(function(d) { return d.BODY_TYP2; })
                           .rollup(function(i) { return i.length; })
                           .entries(data);
+        //console.log(dataNest1);
 
-        var svgPie = d3.select("#byTypePie")
-                       .append("g")
-                       .attr("transform", "translate(" + (radius+4*margin.left) + "," + (radius+4*margin.top) + ")");
-    
-        //var colorPie = d3.scale.category20();
         var colorPie = d3.scale.ordinal()
-                         .domain(["1", "2", "3", "4", "6", "7"])
+                         .domain(["1", "2", "3", "4", "5", "6"])
                          .range(colorsPie);
     
         // Arc for vehicle type
@@ -272,7 +353,7 @@ function byType() {
 
         var pie1 = pieType(dataNest1);
 
-        var tip = d3.select("body")
+        var tip = d3.select("#vis-byType")
                     .append("div")
                     .attr("class", "tooltip-type");
 
@@ -289,20 +370,14 @@ function byType() {
                              .attr("d", arcType)
                              .style("fill", function(d) { return colorPie(d.data.key); })
                              .on("mouseover", function(d) {
-                                 
                                  var percent = d3.format(",.2%")((d.endAngle - d.startAngle) / 6.283185307179586);
-
                                  tip.html("<b>" + typeScale(d.data.key) + "</b><br/>" + d.value + "<br/>" + percent)
                                     .style('top', (d3.event.pageY + 10) + 'px')
                                     .style('left', (d3.event.pageX + 10) + 'px')
                                     .style("display", "block");
-
-                                 mouseOver(this.id.slice(4) - 1);
-
                                 })
                              .on("mouseout", function(d) {
                                  tip.style("display", "none");
-                                 return mouseOut(this.id.slice(4) - 1);
                                 });
         
         var legendPie = svgPie.selectAll(".legend-pie")
@@ -339,34 +414,38 @@ function byType() {
 
         // Compute the start and end angle for fatality levels for each vehicle type
         dataNest2.forEach(function(d, i) {
-            //console.log('hhh');
             d.values[0].startAngle = pie1[i].startAngle;
             d.values[0].endAngle = d.values[0].startAngle + d.values[0].values * (pie1[i].endAngle - pie1[i].startAngle) / pie1[i].value;
-            d.values[1].startAngle = d.values[0].endAngle;
-            d.values[1].endAngle = d.values[1].startAngle + d.values[1].values * (pie1[i].endAngle - pie1[i].startAngle) / pie1[i].value;
-            d.values[2].startAngle = d.values[1].endAngle;
-            d.values[2].endAngle = d.values[2].startAngle + d.values[2].values * (pie1[i].endAngle - pie1[i].startAngle) / pie1[i].value;
+            if ((d.values).length > 1) {
+                d.values[1].startAngle = d.values[0].endAngle;
+                d.values[1].endAngle = d.values[1].startAngle + d.values[1].values * (pie1[i].endAngle - pie1[i].startAngle) / pie1[i].value;
+                if ((d.values).length > 2) {
+                    d.values[2].startAngle = d.values[1].endAngle;
+                    d.values[2].endAngle = d.values[2].startAngle + d.values[2].values * (pie1[i].endAngle - pie1[i].startAngle) / pie1[i].value;
+                };
+            };
         });
     
         // Arc for vehicle type
         var arcLvl = d3.svg.arc()
                         .startAngle(function(d) { return d.startAngle; })
                         .endAngle(function(d) { return d.endAngle; })
-                        .outerRadius(radius + 2 * margin.top)
+                        .outerRadius(radius + 2*margin.top)
                         .innerRadius(radius - 5)
                         .padAngle(.005);
 
         var arcsLvl = svgPie.selectAll(".arcsLvl");
 
         dataNest2.forEach(function(d, i) {
+            console.log((d.values).length);
             arcsLvl.data(d.values)
                    .enter()
                    .append("path")
-                   .attr("class", "arcsLvl")
-                   .attr("id", function(d) { return 'lvl'+d.key; })
+                   .attr("class", "arcsLvl"+d.key)
+                   .attr("id", function(g) { return 'lvl'+g.key; })
                    .attr("d", arcLvl)
-                   .style("fill", function(d) { return colorLvl(d.key); })
-                   .style("opacity", 0);
+                   .style("fill", function(g) { return colorLvl(g.key); })
+                   .style("opacity", 0.7);
         });
 
         var legendFatal = svgPie.selectAll(".legend-fatal")
@@ -388,46 +467,7 @@ function byType() {
                  .attr("x", width / 4 + 90)
                  .attr("y", function(d, i) { return i * 25 + 65; });
         
-        legendFatal.style("display", "none");
-
-        // Circle for clicking
-        svgPie.append("circle")
-           .attr("id", "checkFatalLvl")
-           .attr("cx", 0)
-           .attr("cy", 0)
-           .attr("r",radius/3)
-           .attr("fill", "white")
-           .on("click", function() {
-
-               d3.selectAll(".arcsLvl")
-                 .transition()
-                 .duration(1000)
-                 .style("opacity", 0.7);
-
-               legendFatal.transition()
-                          .duration(1000)
-                          .delay(500)
-                          .style("display", "block");
-           });
-
-        svgPie.append("text")
-              .text("CLICK!")
-              .attr("class", "clickCircle")
-              .attr("x", -30)
-              .attr("y", 7)
-              .style("font-size", 20 + "px")
-              .on("click", function() {
-                  d3.selectAll(".arcsLvl")
-                    .transition()
-                    .duration(1000)
-                    .style("opacity", 0.7);
-
-                  legendFatal.transition()
-                             .duration(1000)
-                             .delay(500)
-                             .style("display", "block");
-              });
-
+        legendFatal.style("display", "block");
 
 
         
@@ -457,8 +497,8 @@ function byType() {
                      .attr("rx", 4)
                      .attr("ry", 4)
                      .attr("class", "hour-bordered-" + i)
-                     .attr("width", gridSize - 2)
-                     .attr("height", gridSize - 2)
+                     .attr("width", gridSize - 3)
+                     .attr("height", gridSize - 3)
                      .style("fill", colorHeatmap(v.values))
                      .style("opacity", 0);
                 });
@@ -474,7 +514,7 @@ function byType() {
 
         legendHeatmap.append("rect")
                   .attr("x", function(d, i) { return legendElementWidth * i; })
-                  .attr("y", height + 50)
+                  .attr("y", height)
                   .attr("width", legendElementWidth)
                   .attr("height", gridSize / 2)
                   .style("fill", function(d, i) { return colors[i]; });
@@ -483,50 +523,105 @@ function byType() {
                  .attr("class", "mono-heatmap")
                  .text(function(d) { return "<= " + d; })
                  .attr("x", function(d, i) { return legendElementWidth * (i+1)-15; })
-                 .attr("y", height + 50 + gridSize);
+                 .attr("y", height + gridSize);
 
-        function highlightMap(index) {
-            d3.selectAll(".hour-bordered-" + index)
-              .transition()
-              .duration(500)
-              .style("opacity", 1);
-        };
+        highlightMap(0);
 
-        function blurMap(index) {
-            d3.selectAll(".hour-bordered-" + index)
-              .transition()
-              .duration(500)
-              .style("opacity", 0);
-        };
 
-        highlightMap(1);
+        d3.select('#commute-select')
+          .on('change', commuteChange);
 
-        function mouseOver(index) {
-            if (index == 1) { return highlightMap(1); }
-            else {
-                blurMap(1);
-                highlightMap(index);
+        function commuteChange(){
+            var commuteMode = ['-- Select Vehicle Type --',
+		               'Sedan/Hardtop/2-Door Coupe',
+	                   'Utility',
+					   'Van',
+					   'Light Vehicle',
+					   'Other',
+					   'Truck'];
+		    var commuteState = d3.select('#commute-select').property('value');
+		    var index = commuteMode.indexOf(commuteState);
+		    console.log(index);
+		    highlightType(index);
+	    };
+
+        function highlightType(index) {
+
+            var blurList =  [0,1,2,3,4,5];
+
+            if (index == 0) {
+        
+                // Dealing with pie
+                d3.selectAll(".arcsType")
+                  .transition()
+                  .duration(500)
+                  .style("opacity", 1);
+                blurList.forEach(function(d) {
+                    d3.selectAll(".arcsLvl" + (d + 1))
+                      .transition()
+                      .duration(500)
+                      .style("opacity", 0.7);
+                });
+        
+                // Dealing with heatmap
+                highlightMap(0);
             }
-        };
-
-        function mouseOut(index) {
-            if (index == 1) { return highlightMap(1); }
+        
             else {
-                blurMap(index);
-                highlightMap(1);
-            }
+                blurList.splice(index - 1, 1);
+                blurList.forEach(function(d, i) {
+                    // Dealing with pie
+                    d3.selectAll("#type" + (d + 1))
+                      .transition()
+                      .duration(500)
+                      .style("opacity", 0.2);
+                    d3.selectAll(".arcsLvl" + (d + 1))
+                      .transition()
+                      .duration(500)
+                      .style("opacity", 0.1);
+                    // Dealing with heatmap
+                    blurMap(d);
+                });
+            
+                d3.selectAll("#type" + index)
+                  .transition()
+                  .duration(500)
+                  .style("opacity", 1);
+                d3.selectAll(".arcsLvl" + index)
+                  .transition()
+                  .duration(500)
+                  .style("opacity", 0.7);
+                highlightMap(index - 1);
+            };
         };
-
-    });
 
 };
 
+function highlightMap(index) {
+    d3.selectAll(".hour-bordered-" + index)
+      .transition()
+      .duration(500)
+      .style("opacity", 1);
+};
+
+function blurMap(index) {
+    d3.selectAll(".hour-bordered-" + index)
+      .transition()
+      .duration(500)
+      .style("opacity", 0);
+};
+
+
+
+
 
 /* Statistics by Weather and Fatality Number */
-function byWeather() {
+function byWeather(weatherData) {
 
-    var width = 800,
-        height = 400,
+    var data = (JSON.parse(JSON.stringify(weatherData)));
+
+    var width = 700,
+        height = 350,
         padding = 50;
 
     // Define the scales
@@ -534,10 +629,9 @@ function byWeather() {
     var xScale = d3.time.scale()
                         .domain([formatDate.parse('0'), formatDate.parse('23')])
                         .range([padding, width - padding]);
-
     var yScale = d3.scale.linear()
-                         .domain([0, 1500])
-                         .range([height - padding, 0]);
+                         .domain([0.8, 4])
+                         .range([height, padding]);
 
     // Define the axis
     var xAxis = d3.svg.axis().scale(xScale)
@@ -547,62 +641,56 @@ function byWeather() {
 
     var color = d3.scale.category20();
 
-    var svg = d3.select("#byWeather");
+    var svg = d3.select("#svg-weather")
+                .append("svg")
+                .attr("id", "byWeather")
+                .attr("height", 400)
+                .attr("width", 800);
 
     // Define the line
     var weatherLine = d3.svg.line()
                         .x(function(d) { return d.values.hourScale; })
-                        .y(function(d) { return yScale(d.values.total); });
+                        .y(function(d) { return yScale(d.values.avg); });
 
-    // Load data
-    d3.csv("data/type3.csv", function(error, data) {
-
-        data.forEach(function(d) {
-            d.hour = formatDate.parse(d.HOUR);
-            d.hourScale = xScale(formatDate.parse(d.HOUR));
-            d.weather = d.WEATHER;
-            d.count = +d.FATAL_COUNT;
-        });
-
-        // Group data by weather
-        var dataNest = d3.nest()
-                         .key(function(d) { return d.weather; })
-                         .key(function(d) { return d.hour; }).sortKeys(d3.ascending)
-                         .rollup(function(d) {
-                             return {
-                                 hourScale: d3.mean(d, function(v) { return v.hourScale; }),
-                                 total: d3.sum(d, function(v) { return v.count; })
-                             };
-                         })
-                         .entries(data);
-        
-        // froEach means drawing line for each key
-        dataNest.forEach(function(d, i) {
-
-            //console.log(d.values);
-
-            svg.append("svg:path")
-               .attr("class", "weatherLine")
-               .style("stroke", function() { return color(d.key); })
-               .style("stroke-width", 3)
-               .attr("opacity", 1)
-               .attr("id", 'weather'+d.key)
-               .attr("d", weatherLine(d.values))
-               .attr("fill", "none");
-
-        });
-
-        svg.append("g")
-           .attr("class", "axis")
-           .attr("transform", "translate(0," + (height-padding) + ")")
-           .call(xAxis);
-
-        svg.append("g")
-           .attr("class", "axis")
-           .attr("transform", "translate(" + padding + ", 0)")
-           .call(yAxis);
-
+    // Group data by weather
+    var dataNest = d3.nest()
+                     .key(function(d) { return d.WEATHER; })
+                     .key(function(d) { return d.hourtime; }).sortKeys(d3.ascending)
+                     .rollup(function(d) {
+                         return {
+                             hourScale: d3.mean(d, function(v) { return v.hourScale; }),
+                             avg: d3.sum(d, function(v) { return v.count; }) / d.length
+                         };
+                     })
+                     .entries(data);
+    
+    // froEach means drawing line for each key
+    dataNest.forEach(function(d, i) {
+        //console.log(d.values);
+        svg.append("svg:path")
+           .attr("class", "weatherLine")
+           .style("stroke", function() { return color(d.key); })
+           .style("stroke-width", 3)
+           .attr("opacity", 1)
+           .attr("id", 'weather'+d.key)
+           .attr("d", weatherLine(d.values))
+           .attr("fill", "none");
     });
+
+    svg.append("g")
+       .attr("class", "axis")
+       .attr("transform", "translate(0," + height + ")")
+       .call(xAxis);
+
+    svg.append("g")
+       .attr("class", "axis")
+       .attr("transform", "translate(" + padding + ", 0)")
+       .call(yAxis);
+
+    svg.append("text")
+       .attr("x", 60)
+       .attr("y", 60)
+       .text("Average Death per Accident");
          
 }
 
@@ -610,482 +698,154 @@ function highlightLine() {
 
     var svg = d3.select("#byWeather");
     weatherVar = document.getElementById('weatherVar').value;
+    if (weatherVar == 0) {
+        svg.selectAll(".weatherLine")
+           .transition()
+           .duration(600)
+           .ease("linear")
+           .attr("opacity", 1)
+           .style("stroke-width", 3);
+    }
+    else {
+        // Blur other lines
+        svg.selectAll(".weatherLine")
+           .transition()
+           .duration(600)
+           .ease("linear")
+           .attr("opacity", 0.3)
+           .style("stroke-width", 3);
 
-    // Blur other lines
-    svg.selectAll(".weatherLine")
-       .transition()
-       .duration(600)
-       .ease("linear")
-       .attr("opacity", 0.5)
-       .style("stroke-width", 3);
-
-    // Highlight the chosen weather line
-    svg.select("#weather"+weatherVar)
-       .transition()
-       .duration(600)
-       .ease("linear")
-       .attr("opacity", 1)
-       .style("stroke-width", 7);
+        // Highlight the chosen weather line
+        svg.select("#weather"+weatherVar)
+           .transition()
+           .duration(600)
+           .ease("linear")
+           .attr("opacity", 1)
+           .style("stroke-width", 7);
+    };
+ 
 };
 
 
 
-/**********Statistic by state***********/
-function byState(){
+/* Statistics by Bad Behaviors */
+function byBehave(behave1 = 1, behave2 = 0, behaveData) {
 
- arg1=0;
- arg2=0;
- arg3=0;
- find_state=1;
+    var data = (JSON.parse(JSON.stringify(behaveData)));
 
-$('#inputbutton').click(function(){
- 
- arg1=0;
- arg2=0;
- arg3=0;
- find_state=1;
+    var height = 340,
+        width = 600,
+        barPadding = 0,
+        margin = {top: 30, right: 30, bottom: 30, left: 70},
+        weekday = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    var behaveDataNest = d3.nest()
+                           .key(function(d) { return d.SPEEDREL2; })
+                           .key(function(d) { return d.MDRDSTRD2; })
+                           .key(function(d) { return d.DAY_WEEK; }).sortKeys(d3.ascending)
+                           .rollup(function(d) {
+                               // return average death per accident
+                               return d3.sum(d, function(g) { return g.count; }) / d.length;
+                           })
+                           .entries(data);
+
+    function chosenBehave(behave1, beheve2) {
+        var behaveDataNestChosen = behaveDataNest.filter(function(d) { return d.key == behave1; })[0].values
+                                             .filter(function(g) { return g.key == behave2; })[0].values;
+        return behaveDataNestChosen;
+    }; 
+    
+    var behaveDataNestChosen = chosenBehave(behave1, behave2);
+    var behaveDataNestDefault = chosenBehave(0, 0);
+
+    // Set the range
+    var xScale = d3.scale.ordinal().rangePoints([0, width]).domain([1,2,3,4,5,6,7]);
+    var yScale = d3.scale.linear().range([height, 0]).domain([1.05, 2]);
+
+    // Define the axis
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+    var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+    // Define the bar
+    var svgBehave = d3.select("#behaveDiv")
+                      .append("svg")
+                      .attr("id", "byBehave")
+                      .attr("height", 400)
+                      .attr("width", 800)
+                      .append("g")
+                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+    svgBehave.selectAll(".bar-behave-chosen")
+             .data(behaveDataNestChosen)
+             .enter()
+             .append("rect")
+             .attr("class", "bar-behave-chosen")
+             .attr("x", function(d) { return 10 + xScale(d.key); })
+             .attr("y", function(d) { return yScale(d.values); })
+             .attr("width", 50)
+             .attr("height", function(d) { return height - yScale(d.values); })
+             .style("fill", "#999999");
+
+    svgBehave.selectAll(".bar-behave-default")
+             .data(behaveDataNestDefault)
+             .enter()
+             .append("rect")
+             .attr("class", "bar-behave-default")
+             .attr("x", function(d) { return 10 + xScale(d.key); })
+             .attr("y", function(d) { return yScale(d.values); })
+             .attr("width", 50)
+             .attr("height", function(d) { return height - yScale(d.values); })
+             .style("fill", "#1abc9c");
+
+    // Define labels
+    svgBehave.selectAll(".labels")
+             .data(weekday)
+             .enter()
+             .append("text")
+             .attr("class", "labels")
+             .attr("x", function(d, i) { return xScale(i + 1) + 17; })
+             .attr("y", height + 30)
+             .text(function(d) { return d; });
+    
+    // Add the Y Axis
+    svgBehave.append("g")
+             .attr("class", "axis")
+             .attr("id", "y-axis")
+             .call(yAxis);
+
+    svgBehave.append("text")
+             .attr("x", 10)
+             .attr("y", 10)
+             .text("Average Death per Accident");
 
 
- //highlight the selected state
-var tem = $('#inputValue').val();
- find_state=tem;
- d3.selectAll("rect")
-     .style("fill", function(d,i) {
-         var tmp=find_state-1;
-         if(find_state==3 || find_state==7 || find_state==14 || find_state==43 || find_state==52)
-         return "#98abc5";
-         if(find_state>3)
-         tmp--;
-         if(find_state>7)
-         tmp--;
-         if(find_state>14 )
-        { tmp--;
-        }
-         if(find_state>43 )
-        { tmp--;
-        }
-         if(find_state>52 )
-        { tmp--;
-        }
-         if(i==tmp)
-          return "yellow";
-          else
-          return "#98abc5"; });
 
+    d3.select("#btnOperate")
+      .on("click", clickSubmit);
 
-     // do the pie chart
-    d3.csv("data/pie_chart1.csv",function(error,csvdata){  
-      
-        if(error){  
-            console.log("haha"+error);  
-        }  
-        
-		for( var i=0; i<csvdata.length; i++ ){  
-    var state = csvdata[i].STATE;  
-    var fatal_count = csvdata[i].FATAL_COUNT;  
-    var total_count = csvdata[i].TOTAL_COUNT;  
-
-
-				 if(state==find_state && fatal_count==1)
-				 arg1= total_count;
-				  if(state==find_state && fatal_count==2)
-				 arg2= total_count;
-				  if(state==find_state && ">2"==fatal_count)
-				 arg3= total_count;
-          
-    }
-	 console.log(arg1+"---"+arg2+"---"+arg3);
-
-	});  
+    function clickSubmit(data=behaveDataNest) {
+    
+        var speeding = document.getElementById("checkbox1").checked ? 1 : 0,
+            distracted = document.getElementById("checkbox2").checked ? 1 : 0;
    
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-var x0 = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .1);
-
-var x1 = d3.scale.ordinal();
-
-var y = d3.scale.linear()
-    .range([height, 0]);
-
-var color = d3.scale.ordinal()
-    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
-
-var xAxis = d3.svg.axis()
-    .scale(x0)
-    .orient("bottom");
-
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
-    .tickFormat(d3.format(".2s"));
-
-var svg = d3.select("div#bar_chart1").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-d3.csv("data/bar_chart1.csv", function(error, data) {
-  if (error) throw error;
-   console.log(data);  
-
-  var ageNames = d3.keys(data[0]).filter(function(key) { return key !== "State"; });
-
-  data.forEach(function(d) {
-    d.ages = ageNames.map(function(name) { return {name: name, value: +d[name]}; });
-  });
-
-  x0.domain(data.map(function(d) { return d.State; }));
-  x1.domain(ageNames).rangeRoundBands([0, x0.rangeBand()]);
-  y.domain([0, d3.max(data, function(d) { return d3.max(d.ages, function(d) { return d.value; }); })]);
-
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("FATAL_COUNT");
-
-   var state = svg.selectAll(".state")
-      .data(data)
-    .enter().append("g")
-      .attr("class", "state")
-      .attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; })
-      
-       .on('click',function(){
-      
-         
-      secondStep(parseInt(arg1),parseInt(arg2),parseInt(arg3));
-      });
-
-     state.selectAll("rect")
-      .data(function(d) { return d.ages; })
-    .enter()
-    .append("rect")
-      .attr("width", x1.rangeBand())
-      .attr("x", function(d) { return x1(d.name); })
-      .attr("y", function(d) { return y(d.value); })
-      .attr("height", function(d) { return height - y(d.value); })
-      .style("fill", function(d) { return color(d.name); })
+        function chosenBehave(speeding, distracted) {
+            var behaveDataNestChosen = data.filter(function(d) { return d.key == speeding; })[0].values
+                                           .filter(function(g) { return g.key == distracted; })[0].values;
+            return behaveDataNestChosen;
+        };    
     
-     
+        d3.selectAll(".bar-behave-chosen")
+          .data(chosenBehave(speeding, distracted))
+          .transition()
+          .duration(750)
+          .attr("x", function(d) { return 10 + xScale(d.key); })
+          .attr("y", function(d) { return yScale(d.values); })
+          .attr("width", 50)
+          .attr("height", function(d) { return height - yScale(d.values); })
+          .style("fill", "#999999")
+    };             
 
-});
-
-
-
-
-
-
-function secondStep( arg1, arg2, arg3){
-console.log(arg1+"~~~"+arg2+"~~~"+arg3);
-
-var pie = new d3pie("pieChart", {
-	"header": {
-		"title": {
-			"text": "STATE "+find_state,
-			"fontSize": 24,
-			"font": "open sans"
-		},
-		"subtitle": {
-			"text": "the total fatal",
-			"color": "#999999",
-			"fontSize": 12,
-			"font": "open sans"
-		},
-		"titleSubtitlePadding": 9
-	},
-	"footer": {
-		"color": "#999999",
-		"fontSize": 10,
-		"font": "open sans",
-		"location": "bottom-left"
-	},
-	"size": {
-		"canvasWidth": 590,
-		"pieOuterRadius": "90%"
-	},
-	"data": {
-		"sortOrder": "value-desc",
-		"content": [
-			{
-				"label": "FATAL_COUNT=1",
-				"value": arg1,
-				"color": "#2484c1"
-			},
-			{
-				"label": "FATAL_COUNT=2",
-				"value": arg2,
-				"color": "#0c6197"
-			},
-			{
-				"label": "FATAL_COUNT>2",
-				"value": arg3,
-				"color": "#4daa4b"
-			}
-			
-		]
-	},
-	"labels": {
-		"outer": {
-			"pieDistance": 32
-		},
-		"inner": {
-			"hideWhenLessThanPercentage": 0
-		},
-		"mainLabel": {
-			"fontSize": 11
-		},
-		"percentage": {
-			"color": "#ffffff",
-			"decimalPlaces": 0
-		},
-		"value": {
-			"color": "#adadad",
-			"fontSize": 11
-		},
-		"lines": {
-			"enabled": true
-		},
-		"truncation": {
-			"enabled": true
-		}
-	},
-	"effects": {
-		"pullOutSegmentOnClick": {
-			"effect": "linear",
-			"speed": 400,
-			"size": 8
-		}
-	},
-	"misc": {
-		"gradient": {
-			"enabled": true,
-			"percentage": 100
-		}
-	}
-});
-
-
-}
-
-
-}
-
-
-function byBehavior(find_state){
-  dataset = new Array();
-  find_state=find_state;
-  var map1=new Array(); 
-  var map2=new Array(); 
-  var map3=new Array(); 
-  var map4=new Array(); 
-for(var i=0;i<57;i++){ 
-map1[i]=new Array(); 
-map2[i]=new Array();
-map3[i]=new Array();
-map4[i]=new Array();
-for(var j=0;j<8;j++){ 
-map1[i][j]=null;
-map2[i][j]=null;
-map3[i][j]=null;
-map4[i][j]=null;
-}
-}
+};
 
 
 
-    d3.csv("data/behavior.csv",function(error,csvdata){  
-      
-        if(error){  
-            console.log(error);  
-        }  
-        
-		for( var i=1; i<csvdata.length; i++ ){  
-    var state = parseInt(csvdata[i].STATE);  
-    var fatals = parseInt(csvdata[i].FATALS);  
-    var day_week = parseInt(csvdata[i].DAY_WEEK); 
-    var mdrdstrd = parseInt(csvdata[i].MDRDSTRD);
-    var speedrel = parseInt(csvdata[i].SPEEDREL);
-   
-// whether the driver has distract or speeding
-    if(mdrdstrd==0 && speedrel ==0)          
-        map1[state][day_week]+= fatals;  
-    if(mdrdstrd!=0 && speedrel ==0)              
-        map2[state][day_week]+= fatals;    
-    if(mdrdstrd==0 && speedrel !=0)            
-        map3[state][day_week]+= fatals;  
-    if(mdrdstrd!=0 && speedrel !=0)             
-        map4[state][day_week]+= fatals;                           
-				
-          
-    }
-
-       for(var i=1;i<8;i++){ 
-dataset[i]=map1[find_state][i];
-    }
-
-showclass();
-	}); 
-
-
-$('#btnOperate').click(function(){
-  
-if(document.getElementById("checkbox1").checked==true && document.getElementById("checkbox2").checked==true){
-    console.log("checkbox1,2 is checked");
-        for(var i=1;i<8;i++){ 
-dataset[i]=map4[find_state][i];
-    }
-showclass();
-    
-}
-if(document.getElementById("checkbox1").checked==true && document.getElementById("checkbox2").checked==false){
-    console.log("checkbox1 is checked");
-        for(var i=1;i<8;i++){ 
-dataset[i]=map3[find_state][i];
-    }
-showclass();
-    
-}
-if(document.getElementById("checkbox1").checked==false && document.getElementById("checkbox2").checked==true){
-    console.log("checkbox2 is checked");
-        for(var i=1;i<8;i++){ 
-dataset[i]=map2[find_state][i];
-    }
-showclass();
-    
-}
-if(document.getElementById("checkbox1").checked==false && document.getElementById("checkbox2").checked==false){
-    console.log("checkbox1,2 is not checked");
-        for(var i=1;i<8;i++){ 
-dataset[i]=map1[find_state][i];
-    }
-showclass();
-    
-}
-
-    });
-
-
-
-function showclass(){
-
-
-	var width = 400;
-	var height = 400;
-
-	//add svg	
-	 svg = d3.select("div#bar_chart2")
-		.append("svg")
-		.attr("width", width)
-		.attr("height", height);
-
-	var padding = {left:30, right:30, top:20, bottom:20};
-
-	
-
-	var xScale = d3.scale.ordinal()
-		.domain(d3.range(dataset.length))
-		.rangeRoundBands([0, width - padding.left - padding.right]);
-
-
-	var yScale = d3.scale.linear()
-		.domain([0,d3.max(dataset)])
-		.range([height - padding.top - padding.bottom, 0]);
-
-	//define axis
-	var xAxis = d3.svg.axis()
-		.scale(xScale)
-		.orient("bottom");
-		
-	
-	var yAxis = d3.svg.axis()
-		.scale(yScale)
-		.orient("left");
-
-	//add rect
-	var rectPadding = 4;
-
-	var rects = svg.selectAll(".MyRect")
-		.data(dataset)
-		.enter()
-		.append("rect")
-		.attr("class","MyRect")
-		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
-		.attr("x", function(d,i){
-			return xScale(i) + rectPadding/2;
-		} )
-		.attr("y",function(d){
-			return yScale(d);
-		})
-		.attr("width", xScale.rangeBand() - rectPadding )
-		.attr("height", function(d){
-			return height - padding.top - padding.bottom - yScale(d);
-		});
-
-	//add text
-	var texts = svg.selectAll(".MyText")
-		.data(dataset)
-		.enter()
-		.append("text")
-		.attr("class","MyText")
-		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
-		.attr("x", function(d,i){
-			return xScale(i) + rectPadding/2;
-		} )
-		.attr("y",function(d){
-			return yScale(d);
-		})
-		.attr("dx",function(){
-			return (xScale.rangeBand() - rectPadding)/2;
-		})
-		.attr("dy",function(d){
-			return 20;
-		})
-		.text(function(d){
-			return d;
-		});
-
-	//add x-axis
-	svg.append("g")
-		.attr("class","axis")
-		.attr("transform","translate(" + padding.left + "," + (height - padding.bottom) + ")")
-		.call(xAxis); 
-		
-	//add y-axis
-	svg.append("g")
-		.attr("class","axis")
-		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
-		.call(yAxis);
-
-
-}
-
-
-}

@@ -17,55 +17,33 @@ function selectMenu(){
 
 	function stateChange(){
 		var selectState = d3.select('#state-select').property('value');
-		console.log(selectState);
+		return selectState;
 	};
 
-	/*
-
-	need to change from other member
-
-	*/
-	var commuteMode = ['car','motor','truck'];
+	var commuteMode = ['-- Select Vehicle Type --',
+		               'Sedan/Hardtop/2-Door Coupe',
+	                   'Utility',
+					   'Van',
+					   'Light Vehicle',
+					   'Other',
+					   'Truck'];
 
 	var commuteSelect = d3.select('#commute')
 	 	.append('select')
 	 	.attr('id','commute-select')
-	 	.attr('class','selectMenu')
-	 	.on('change', commuteChange);
+	 	.attr('class','selectMenu');
+	 	//.on('change', commuteChange);
 
 	var commuteOptions = commuteSelect.selectAll('option')
 		.data(commuteMode)
 		.enter()
 		.append('option')
-		.text(function(d) {return d;});
+		.text(function(d) { return d; });
 
-	function commuteChange(){
-		var commuteState = d3.select('#commute-select').property('value');
-		console.log(commuteState);
-	};
 
-	/*
-
-	need to change from other member
-	var weather = ['rainy','snow','sunny'];
-
-	var weatherSelect = d3.select('#weather')
-	 	.append('select')
-	 	.attr('id','weather-select')
-	 	.attr('class','selectMenu')
-	 	.on('change', weatherChange);
-
-	var weatherOptions = weatherSelect.selectAll('option')
-		.data(weather)
-		.enter()
-		.append('option')
-		.text(function(d) {return d;});
-
-	function weatherChange(){
-		var weatherState = d3.select('#weather-select').property('value');
-		console.log(weatherState);
-	};
-	*/
+	
+	d3.select("#weatherVar")
+	  .on("change", highlightLine);
 
 };
 
