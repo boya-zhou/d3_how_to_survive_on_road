@@ -21,7 +21,7 @@
       </div>
       <div class="col-lg-9">
         <div class='vis' id="vis-byYear">
-            <svg id="byYear" height="400" width="800"></svg>
+            <svg id="byYear"></svg>
         </div>
       </div>
     </section>
@@ -48,55 +48,52 @@
       </div>
     </section>
 
+    <div id="extra-space">
+    </div>
+
     <section class="step row">
       <div class="title col-lg-3" id = "weather">
         Which kind of severe weather did you encounter most often in last two weeks?<br/><br/>
-            <div id="sidebar-weather">
-                <select class= 'selectMenu' id="weatherVar" onchange="highlightLine()">
-                    <option value="0" selected="selected">
-                        <!-- No Additional Atmospheric Conditions -->
-                        -- Select Weather --
-                    </option>
-                    <option value="1">Clear</option>
-                    <option value="2">Rain</option>
-                    <option value="3">Sleet, Hail</option>
-                    <option value="4">Snow</option>
-                    <option value="5">Fog, Smog, Smoke</option>
-                    <option value="10">Cloudy</option>
-                </select>
-            </div>        
+        <div id="sidebar-weather">
+            <select class= 'selectMenu' id="weatherVar" onchange="highlightLine()">
+                <option value="0" selected="selected">
+                    <!-- No Additional Atmospheric Conditions -->
+                    -- Select Weather --
+                </option>
+                <option value="1">Clear</option>
+                <option value="2">Rain</option>
+                <option value="3">Sleet, Hail</option>
+                <option value="4">Snow</option>
+                <option value="5">Fog, Smog, Smoke</option>
+                <option value="10">Cloudy</option>
+            </select>
+        </div>        
       </div>
-      <div class="col-lg-9">
-        <div class='vis' id="vis-byWeather">
-            <div id="weatherDiv">
-              <div id="svg-weather">
-              </div>
-            </div>
+      <div class="col-lg-9" >
+        <div class='vis' id="svg-weather">
         </div>
       </div>
     </section>
 
-    <section class="step row">
-      <div class="title col-lg-3" id = "badBehaviour">
+    <section class="step row" >
+      <div class="title col-lg-3" id = "badBehaviour" >
         text for bad behaviour<br/><br/>
+        <p><input type="checkbox" name="category" id="checkbox1" value="distract" checked="checked"/>  speeding</p>
+        <p><input type="checkbox" name="category" id="checkbox2" value="speeding" />  distracted</p>   
+        <p><input id="btnOperate" type="button" value="submit" /></p>
       </div>
-      <div class="col-lg-9">
-        <div class='vis' id="vis-byBehave">
-            <p><input type="checkbox" name="category" id="checkbox1" value="distract" checked="checked"/>  speeding</p>   
-            <p><input type="checkbox" name="category" id="checkbox2" value="speeding" />  distracted</p>   
-            <p><input id="btnOperate" type="button" value="submit" /></p>
-            <div id="behaveDiv">
-            </div>
+      <div class="col-lg-9" >
+        <div class='vis' id="behaveDiv">
         </div>
       </div>
     </section>
 
     <section class="step row">
-      <div class="title col-lg-3" id = "end">
+      <div class="title col-lg-3" id = "end" >
         text for end<br/><br/>
       </div>
       <div class="col-lg-9">
-        <div id='vis'>
+        <div class='vis'>
         </div>
       </div>
     </section>
@@ -106,13 +103,11 @@
 
 
 </div>
-<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
 <script src="js/jquery-3.1.1.js"></script>
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <script src="js/script.js"></script>
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 <script src="js/sections.js"></script>
-<script src="js/d3pie.min.js"></script>
 
 </body>
 </html>

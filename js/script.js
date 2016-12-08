@@ -3,11 +3,14 @@ $(document).ready(function() {
     byYear();
 
     d3.csv("data/final0.csv", function(error, data) {
-
+        
+        var margin = {top: 30, right: 100, bottom: 100, left: 100 },
+            width = 1000 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
         var formatDate = d3.time.format("%H");
         var hourScale = d3.time.scale()
                           .domain([formatDate.parse('0'), formatDate.parse('23')])
-                          .range([50, 650]);
+                          .range([0, width]);
 
         data.forEach(function(d) {
             d.day = +d.DAY_WEEK;
@@ -70,15 +73,14 @@ $(document).ready(function() {
 /* Data Source: https://en.wikipedia.org/wiki/List_of_motor_vehicle_deaths_in_U.S._by_year */
 function byYear() {
 
-    var height = 340,
-        width = 670,
-        margin = {top: 30, right: 30, bottom: 30, left: 70};
-
+    var margin = {top: 30, right: 100, bottom: 100, left: 100 },
+        width = 1000 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom
     // Format date
     var date = d3.time.format("%Y").parse;
 
     // Set the range
-    var xScale = d3.time.scale().range([0, width]);
+    var xScale = d3.time.scale().range([0, width]).nice();
     var yScale = d3.scale.linear().range([height, 0]).nice();
 
     // Define the axis
@@ -91,6 +93,8 @@ function byYear() {
                       .y(function(d) { return yScale(d.death); });   
 
     var svg = d3.select("#byYear")
+                .attr('width',width + margin.left + margin.right)
+                .attr('height',height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -260,21 +264,18 @@ function byYear() {
     });
 };
 
-
-
 function byState() {
     // some states did not appear in the dataset
     // Pls remember to remove those statesName from section.js and
     // states and stateScale in the main function in script.js
 }
 
-
 /* Statistics by Vehicle Type and Fatality Number */
 function byType(typeDate) {
 
     var data = (JSON.parse(JSON.stringify(typeDate)));
 
-    var margin = { top: 30, right: 0, bottom: 100, left: 30 },
+    var margin = {top: 30, right: 100, bottom: 100, left: 100 },
         width = 1000 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom,
         radius = (400 - margin.top)/3;
@@ -594,7 +595,6 @@ function byType(typeDate) {
                 highlightMap(index - 1);
             };
         };
-
 };
 
 function highlightMap(index) {
@@ -611,41 +611,48 @@ function blurMap(index) {
       .style("opacity", 0);
 };
 
-
-
-
-
 /* Statistics by Weather and Fatality Number */
 function byWeather(weatherData) {
 
     var data = (JSON.parse(JSON.stringify(weatherData)));
 
-    var width = 700,
-        height = 350,
+    var margin = {top: 30, right: 100, bottom: 100, left: 100 },
+        width = 1000 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom,
         padding = 50;
 
     // Define the scales
-    var formatDate = d3.time.format("%H");
-    var xScale = d3.time.scale()
-                        .domain([formatDate.parse('0'), formatDate.parse('23')])
-                        .range([padding, width - padding]);
+    var timeFormat = d3.time.format('%I %p'),
+        formatHours = function(d) { return timeFormat(new Date(2015, 1, 1, d)); };
+
+    var xScale = d3.scale.linear()
+                          .domain([0, 24])
+                          .range([0, width]);
+
     var yScale = d3.scale.linear()
-                         .domain([0.8, 4])
-                         .range([height, padding]);
+                         .domain([0.8, 2.2])
+                         .range([height, 0]);
 
     // Define the axis
     var xAxis = d3.svg.axis().scale(xScale)
-                             .orient("bottom");
+                             .orient("bottom")
+                             .tickValues([0,3,6,9,12,15,18,21,24])
+                             .tickFormat(formatHours);
+
+    
     var yAxis = d3.svg.axis().scale(yScale)
-                             .orient("left");
+                             .orient("left")
+                             .tickValues([1.0, 1.3, 1.6, 1.9, 2.2]);
 
     var color = d3.scale.category20();
 
     var svg = d3.select("#svg-weather")
                 .append("svg")
                 .attr("id", "byWeather")
-                .attr("height", 400)
-                .attr("width", 800);
+                .attr("height", height + margin.top + margin.bottom)
+                .attr("width", width + margin.left + margin.right)
+                .append('g')
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     // Define the line
     var weatherLine = d3.svg.line()
@@ -667,7 +674,7 @@ function byWeather(weatherData) {
     // froEach means drawing line for each key
     dataNest.forEach(function(d, i) {
         //console.log(d.values);
-        svg.append("svg:path")
+        svg.append("path")
            .attr("class", "weatherLine")
            .style("stroke", function() { return color(d.key); })
            .style("stroke-width", 3)
@@ -675,22 +682,23 @@ function byWeather(weatherData) {
            .attr("id", 'weather'+d.key)
            .attr("d", weatherLine(d.values))
            .attr("fill", "none");
+
+
     });
 
     svg.append("g")
        .attr("class", "axis")
-       .attr("transform", "translate(0," + height + ")")
+       .attr("transform", "translate(" + 0 + "," + height + ")")
        .call(xAxis);
 
     svg.append("g")
        .attr("class", "axis")
-       .attr("transform", "translate(" + padding + ", 0)")
        .call(yAxis);
 
-    svg.append("text")
-       .attr("x", 60)
-       .attr("y", 60)
-       .text("Average Death per Accident");
+    // svg.append("text")
+    //    .attr("x", 60)
+    //    .attr("y", 60)
+    //    .text("Average Death per Accident");
          
 }
 
@@ -698,6 +706,7 @@ function highlightLine() {
 
     var svg = d3.select("#byWeather");
     weatherVar = document.getElementById('weatherVar').value;
+
     if (weatherVar == 0) {
         svg.selectAll(".weatherLine")
            .transition()
@@ -726,18 +735,15 @@ function highlightLine() {
  
 };
 
-
-
 /* Statistics by Bad Behaviors */
 function byBehave(behave1 = 1, behave2 = 0, behaveData) {
 
     var data = (JSON.parse(JSON.stringify(behaveData)));
 
-    var height = 340,
-        width = 600,
-        barPadding = 0,
-        margin = {top: 30, right: 30, bottom: 30, left: 70},
-        weekday = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    var margin = {top: 30, right: 100, bottom: 100, left: 100 },
+        width = 1000 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom,
+        barPadding = 22.5;
 
     var behaveDataNest = d3.nest()
                            .key(function(d) { return d.SPEEDREL2; })
@@ -758,20 +764,24 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
     var behaveDataNestChosen = chosenBehave(behave1, behave2);
     var behaveDataNestDefault = chosenBehave(0, 0);
 
+    // Define the scales
+    var timeFormat = d3.time.format('%a'),
+        formatYear = function(d) { return timeFormat(new Date(2015, 1, d)); };
+
     // Set the range
-    var xScale = d3.scale.ordinal().rangePoints([0, width]).domain([1,2,3,4,5,6,7]);
-    var yScale = d3.scale.linear().range([height, 0]).domain([1.05, 2]);
+    var xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1).domain([1,2,3,4,5,6,7]);
+    var yScale = d3.scale.linear().range([height, 0]).domain([0.9, 1.3]);
 
     // Define the axis
-    var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
-    var yAxis = d3.svg.axis().scale(yScale).orient("left");
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(formatYear);
+    var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(6);
 
     // Define the bar
     var svgBehave = d3.select("#behaveDiv")
                       .append("svg")
                       .attr("id", "byBehave")
-                      .attr("height", 400)
-                      .attr("width", 800)
+                      .attr("height", height + margin.top + margin.bottom)
+                      .attr("width", width + margin.left + margin.right)
                       .append("g")
                       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
@@ -780,7 +790,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
              .enter()
              .append("rect")
              .attr("class", "bar-behave-chosen")
-             .attr("x", function(d) { return 10 + xScale(d.key); })
+             .attr("x", function(d) { return barPadding + xScale(d.key); })
              .attr("y", function(d) { return yScale(d.values); })
              .attr("width", 50)
              .attr("height", function(d) { return height - yScale(d.values); })
@@ -791,34 +801,26 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
              .enter()
              .append("rect")
              .attr("class", "bar-behave-default")
-             .attr("x", function(d) { return 10 + xScale(d.key); })
+             .attr("x", function(d) { return barPadding + xScale(d.key); })
              .attr("y", function(d) { return yScale(d.values); })
              .attr("width", 50)
              .attr("height", function(d) { return height - yScale(d.values); })
              .style("fill", "#1abc9c");
 
-    // Define labels
-    svgBehave.selectAll(".labels")
-             .data(weekday)
-             .enter()
-             .append("text")
-             .attr("class", "labels")
-             .attr("x", function(d, i) { return xScale(i + 1) + 17; })
-             .attr("y", height + 30)
-             .text(function(d) { return d; });
-    
     // Add the Y Axis
     svgBehave.append("g")
              .attr("class", "axis")
-             .attr("id", "y-axis")
+             .attr('transform',"translate(" + 0 + "," + height + ")")
+             .call(xAxis);    
+    // Add the Y Axis
+    svgBehave.append("g")
+             .attr("class", "axis")
              .call(yAxis);
 
     svgBehave.append("text")
              .attr("x", 10)
              .attr("y", 10)
              .text("Average Death per Accident");
-
-
 
     d3.select("#btnOperate")
       .on("click", clickSubmit);
