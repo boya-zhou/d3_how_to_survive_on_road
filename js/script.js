@@ -21,6 +21,7 @@ $(document).ready(function() {
         });
 
         byType(data);
+        byState(data);
         byWeather(data);
         byBehave(behave1=1, behave2=0, behaveData=data);
 
@@ -264,10 +265,85 @@ function byYear() {
     });
 };
 
-function byState() {
+function byState(data) {
     // some states did not appear in the dataset
     // Pls remember to remove those statesName from section.js and
     // states and stateScale in the main function in script.js
+    var margin = {top: 30, right: 100, bottom: 100, left: 100 },
+        width = 1000 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
+
+    var svgState = d3.select("#byState").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // console.log(stateAcdDict);
+    // update the list of array
+    var stateFatal = data.map(function(d,i){
+        return {
+            state : +d.STATE,
+            count : +d.count
+        };
+    });
+
+    var modeToUseNest = d3.nest()
+        .key(function(d){return d.state})
+        .rollup(function(v) {return d3.sum(v, function(d){return d.count;});})
+        .entries(stateFatal);
+    
+
+    var stateKey = [];
+
+    modeToUseNest.forEach(function(d){
+        stateKey.push(parseInt(d.key));
+    });
+    
+    var stateAbbr = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA"
+                      ,"KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE"
+                      ,"NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD",
+                      "TN","TX","UT","VT","VA","WA","WV","WI","WY","WY"];
+    var value = [];
+    modeToUseNest.forEach(function(d){
+        value.push(parseInt(d.values));
+    });
+    var maxValue = d3.max(value);
+
+    var xScale = d3.scale.ordinal()
+                         .domain(stateAbbr)
+                         .rangeRoundBands([0, width], .05);
+    // console.log(d3.max(modeToUseNest.values));
+    var yScale = d3.scale.linear().domain([0,maxValue]).range([height, 0]);
+
+    var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left")
+        .ticks(10);    
+
+    svgState.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll("text")
+            .style("font-size","9px");
+    
+    svgState.append("g")
+            .attr("class", "axis")
+            .call(yAxis);
+
+    svgState.selectAll("bar")
+        .data(modeToUseNest)
+        .enter().append("rect")
+        .style("fill", "steelblue")
+        .attr("x", function(d,i) { return xScale(stateAbbr[i]); })
+        .attr("width", xScale.rangeBand())
+        .attr("y", function(d) { return yScale(d.values); })
+        .attr("height", function(d) { return height - yScale(d.values); });
 }
 
 /* Statistics by Vehicle Type and Fatality Number */
@@ -438,7 +514,7 @@ function byType(typeDate) {
         var arcsLvl = svgPie.selectAll(".arcsLvl");
 
         dataNest2.forEach(function(d, i) {
-            console.log((d.values).length);
+            // console.log((d.values).length);
             arcsLvl.data(d.values)
                    .enter()
                    .append("path")

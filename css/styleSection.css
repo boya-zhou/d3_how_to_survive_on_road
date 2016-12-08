@@ -60,10 +60,12 @@
   text-anchor: middle;
 }
 
-.axis path,
-.axis line {
+.axis line,
+.axis path {
+  fill: none;
+  stroke: #7C7C7C;
+  stroke-width : 3px;
   shape-rendering: crispEdges;
-  stroke: #000;
 }
 
 .highlight {

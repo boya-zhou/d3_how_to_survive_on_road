@@ -40,8 +40,6 @@ function selectMenu(){
 		.append('option')
 		.text(function(d) { return d; });
 
-
-	
 	d3.select("#weatherVar")
 	  .on("change", highlightLine);
 
