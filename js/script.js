@@ -277,15 +277,15 @@ function byType(typeDate) {
 
     var margin = {top: 30, right: 100, bottom: 100, left: 100 },
         width = 1000 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom,
-        radius = (400 - margin.top)/3;
-        gridSize = Math.floor(width / 28),
-        legendElementWidth = gridSize*2,
+        height = 600 - margin.top - margin.bottom,
+        radius = (height - margin.top)/3,
+        gridSize = Math.floor(width / 24),
+        legendElementWidth = (gridSize * 24) /10,
         buckets = 10,
         colors = ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58", "#000000"], // alternatively colorbrewer.YlGnBu[9]
         colorsPie = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6"],
         colorsFatal = ["#c7e9b4", "#41b6c4", "#081d58"],
-        days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+        days = ["Mon", "Tus", "Wed", "Thu", "Fri", "Sat", "Sun"],
         times = ["1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12a", "1p", "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p", "10p", "11p", "12p"],
         vehicleType = ["Sedan/Hardtop/2-Door Coupe", "Utility", "Van", "Light Vehicle", "Other", "Truck"],
         fatalNum = ["1", "2", ">2"];
@@ -294,16 +294,16 @@ function byType(typeDate) {
     var svgPie = d3.select("#typeDiv")
                    .append("svg")
                    .attr("id", "byTypePie")
-                   .attr("height", 400)
-                   .attr("width", 1000)
+                   .attr("height", height + margin.top + margin.bottom)
+                   .attr("width", width + margin.left + margin.right)
                    .append("g")
-                   .attr("transform", "translate(" + (radius+3*margin.left) + "," + (radius+3*margin.top) + ")");
+                   .attr("transform", "translate(" + 2 * radius + margin.left + "," + 2 * radius + margin.top + ")");
     
     var svgHeatmap = d3.select("#typeDiv")
                        .append("svg")
                        .attr("id", "byTypeHeatmap")
-                       .attr("height", 400)
-                       .attr("width", 1000)
+                       .attr("height", height + margin.top + margin.bottom)
+                       .attr("width", width + margin.left + margin.right)
                        .append("g")
                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -515,7 +515,7 @@ function byType(typeDate) {
 
         legendHeatmap.append("rect")
                   .attr("x", function(d, i) { return legendElementWidth * i; })
-                  .attr("y", height)
+                  .attr("y", gridSize * 8)
                   .attr("width", legendElementWidth)
                   .attr("height", gridSize / 2)
                   .style("fill", function(d, i) { return colors[i]; });
@@ -524,7 +524,7 @@ function byType(typeDate) {
                  .attr("class", "mono-heatmap")
                  .text(function(d) { return "<= " + d; })
                  .attr("x", function(d, i) { return legendElementWidth * (i+1)-15; })
-                 .attr("y", height + gridSize);
+                 .attr("y", gridSize * 9);
 
         highlightMap(0);
 
