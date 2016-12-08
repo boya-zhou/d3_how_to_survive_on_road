@@ -7,6 +7,7 @@ $(document).ready(function() {
         var margin = {top: 30, right: 100, bottom: 100, left: 100 },
             width = 1000 - margin.left - margin.right,
             height = 400 - margin.top - margin.bottom;
+        
         var formatDate = d3.time.format("%H");
         var hourScale = d3.time.scale()
                           .domain([formatDate.parse('0'), formatDate.parse('23')])
@@ -20,22 +21,40 @@ $(document).ready(function() {
             d.count = +d.FATAL_COUNT;
         });
 
-        byType(data);
-        byState(data);
-        byWeather(data);
-        byBehave(behave1=1, behave2=0, behaveData=data);
-
         // Select state
         var dataNestState = d3.nest()
                               .key(function(d) { return d.STATE; })
                               .entries(data);
+
+        var states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware',
+        'Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts',
+        'Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York',
+        'North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee',
+        'Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+
+        var stateCode = [1,2,4,5,6,8,9,10,12,13,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,44,45,46,
+                          47,48,49,50,51,53,54,55,56];
+
+        var stateAbbr = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA"
+                  ,"KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE"
+                  ,"NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD",
+                  "TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+
+        byType(data);
+        byState(data, states, stateCode, stateAbbr);
+        byWeather(data);
+        byBehave(behave1=1, behave2=0, behaveData=data);
+
         d3.select("#state-select").on("change", changeState);
+
         function changeState() {
             // remove states that did not appear
-            var states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+
+            console.log(stateCode.length)
             // adjust the scale
-            var stateScale = d3.scale.ordinal().domain(states).rangePoints([1, 50]);
+            var stateScale = d3.scale.ordinal().domain(states).range(stateCode);
             var selectedState = stateScale(d3.select('#state-select').property('value'));
+            // console.log(selectedState);
             var stateResult = dataNestState.filter(function(d) { return d.key == selectedState; })[0].values;
 
 
@@ -265,7 +284,7 @@ function byYear() {
     });
 };
 
-function byState(data) {
+function byState(data, states, stateCode, stateAbbr) {
     // some states did not appear in the dataset
     // Pls remember to remove those statesName from section.js and
     // states and stateScale in the main function in script.js
@@ -279,7 +298,7 @@ function byState(data) {
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // console.log(stateAcdDict);
+    // console.log(data);
     // update the list of array
     var stateFatal = data.map(function(d,i){
         return {
@@ -293,27 +312,24 @@ function byState(data) {
         .rollup(function(v) {return d3.sum(v, function(d){return d.count;});})
         .entries(stateFatal);
     
+    modeToUseNest = modeToUseNest.filter(function(d) { return stateCode.includes(parseInt(d.key)); });
 
     var stateKey = [];
-
     modeToUseNest.forEach(function(d){
         stateKey.push(parseInt(d.key));
     });
     
-    var stateAbbr = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA"
-                      ,"KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE"
-                      ,"NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD",
-                      "TN","TX","UT","VT","VA","WA","WV","WI","WY","WY"];
     var value = [];
     modeToUseNest.forEach(function(d){
         value.push(parseInt(d.values));
     });
+
+    // console.log(stateKey);
     var maxValue = d3.max(value);
 
     var xScale = d3.scale.ordinal()
                          .domain(stateAbbr)
                          .rangeRoundBands([0, width], .05);
-    // console.log(d3.max(modeToUseNest.values));
     var yScale = d3.scale.linear().domain([0,maxValue]).range([height, 0]);
 
     var xAxis = d3.svg.axis()
@@ -866,9 +882,9 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
              .enter()
              .append("rect")
              .attr("class", "bar-behave-chosen")
-             .attr("x", function(d) { return barPadding + xScale(d.key); })
+             .attr("x", function(d) { return xScale(d.key); })
              .attr("y", function(d) { return yScale(d.values); })
-             .attr("width", 50)
+             .attr("width", xScale.rangeBand())
              .attr("height", function(d) { return height - yScale(d.values); })
              .style("fill", "#999999");
 
@@ -877,9 +893,9 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
              .enter()
              .append("rect")
              .attr("class", "bar-behave-default")
-             .attr("x", function(d) { return barPadding + xScale(d.key); })
+             .attr("x", function(d) { return xScale(d.key); })
              .attr("y", function(d) { return yScale(d.values); })
-             .attr("width", 50)
+             .attr("width", xScale.rangeBand())
              .attr("height", function(d) { return height - yScale(d.values); })
              .style("fill", "#1abc9c");
 
@@ -916,9 +932,9 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
           .data(chosenBehave(speeding, distracted))
           .transition()
           .duration(750)
-          .attr("x", function(d) { return 10 + xScale(d.key); })
+          .attr("x", function(d) { return xScale(d.key); })
           .attr("y", function(d) { return yScale(d.values); })
-          .attr("width", 50)
+          .attr("width", xScale.rangeBand())
           .attr("height", function(d) { return height - yScale(d.values); })
           .style("fill", "#999999")
     };             
