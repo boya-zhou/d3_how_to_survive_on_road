@@ -27,18 +27,18 @@ $(document).ready(function() {
                               .entries(data);
 
         var states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware',
-        'Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts',
-        'Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York',
-        'North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee',
-        'Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+                      'Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts',
+                      'Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York',
+                      'North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee',
+                      'Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
 
         var stateCode = [1,2,4,5,6,8,9,10,12,13,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,44,45,46,
                           47,48,49,50,51,53,54,55,56];
 
         var stateAbbr = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA"
-                  ,"KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE"
-                  ,"NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD",
-                  "TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+                        ,"KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE"
+                        ,"NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD"
+                        ,"TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 
         byType(data);
         byState(data, states, stateCode, stateAbbr);
@@ -46,32 +46,80 @@ $(document).ready(function() {
         byBehave(behave1=1, behave2=0, behaveData=data);
 
         d3.select("#state-select").on("change", changeState);
-
         function changeState() {
             // remove states that did not appear
-
-            console.log(stateCode.length)
             // adjust the scale
             var stateScale = d3.scale.ordinal().domain(states).range(stateCode);
             var selectedState = stateScale(d3.select('#state-select').property('value'));
-            // console.log(selectedState);
             var stateResult = dataNestState.filter(function(d) { return d.key == selectedState; })[0].values;
-
 
             // Select type
             var dataNestType = d3.nest()
                                  .key(function(d) { return d.BODY_TYP2; })
                                  .entries(stateResult);
+
             d3.select("#byTypePie").remove();
             d3.select("#byTypeHeatmap").remove();
+
             byType(stateResult);
             d3.select("#commute-select").on("change", changeType);
+
             function changeType() {
+
+                function highlightType(index) {
+
+                    var blurList =  [0,1,2,3,4,5];
+
+                    if (index == 0) {
+                
+                        // Dealing with pie
+                        d3.selectAll(".arcsType")
+                          .transition()
+                          .duration(500)
+                          .style("opacity", 1);
+                        blurList.forEach(function(d) {
+                            d3.selectAll(".arcsLvl" + (d + 1))
+                              .transition()
+                              .duration(500)
+                              .style("opacity", 0.7);
+                        });
+                
+                        // Dealing with heatmap
+                        highlightMap(0);
+                    }
+                
+                    else {
+                        blurList.splice(index - 1, 1);
+                        blurList.forEach(function(d, i) {
+                            // Dealing with pie
+                            d3.selectAll("#type" + (d + 1))
+                              .transition()
+                              .duration(500)
+                              .style("opacity", 0.2);
+                            d3.selectAll(".arcsLvl" + (d + 1))
+                              .transition()
+                              .duration(500)
+                              .style("opacity", 0.1);
+                            // Dealing with heatmap
+                            blurMap(d);
+                        });
+                    
+                        d3.selectAll("#type" + index)
+                          .transition()
+                          .duration(500)
+                          .style("opacity", 1);
+                        d3.selectAll(".arcsLvl" + index)
+                          .transition()
+                          .duration(500)
+                          .style("opacity", 0.7);
+                        highlightMap(index - 1);
+                    };
+                };              
                 var vehicleType = ["Sedan/Hardtop/2-Door Coupe", "Utility", "Van", "Light Vehicle", "Other", "Truck"];
                 var selectType = vehicleType.indexOf(d3.select('#commute-select').property('value')) + 1;
                 var typeResult = dataNestType.filter(function(d) { return d.key == selectType; })[0].values;
-            };
-
+                highlightType(selectType);
+              };
 
             // Select weather
             d3.select("#byWeather").remove();
@@ -81,13 +129,10 @@ $(document).ready(function() {
             // Select behavior
             d3.select("#byBehave").remove();
             byBehave(behave1=1, behave2=0, behaveData=stateResult);
-            
         };
-
     });
 
 });
-
 
 /* Statistics over Years */
 /* Data Source: https://en.wikipedia.org/wiki/List_of_motor_vehicle_deaths_in_U.S._by_year */
@@ -100,11 +145,11 @@ function byYear() {
     var date = d3.time.format("%Y").parse;
 
     // Set the range
-    var xScale = d3.time.scale().range([0, width]).nice();
+    var xScale = d3.time.scale().range([0, width]);
     var yScale = d3.scale.linear().range([height, 0]).nice();
 
     // Define the axis
-    var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom").ticks(7);
     var yAxis = d3.svg.axis().scale(yScale).orient("left");
 
     // Define the line
@@ -133,10 +178,11 @@ function byYear() {
         });
 
         var dataZoomed = data.slice(109);
+        var data = data.slice(83, 116);
         
         // Scale the range of the data
         xScale.domain(d3.extent(data, function(d) { return d.year; }));
-        yScale.domain([0, d3.max(data, function(d) { return d.death; })]);
+        yScale.domain([25000, d3.max(data, function(d) { return d.death; }) + 1000]);
 
         // Add the valueLine path
         svg.append("path")
@@ -161,41 +207,6 @@ function byYear() {
            .attr("fill", function(d) {
                if (d.Year == 2015) { return "#1abc9c"; }
                else { return "gray"};
-           })
-           .on("mouseenter", function() {
-               d3.select(this)
-                 .transition()
-                 .attr("r", function(d) {
-                     if (d.Year == 2015) { return 9; }
-                     else { return 6; };
-                 });
-           })
-           .on("mouseleave", function() {
-               d3.select(this)
-                 .transition()
-                 .attr("r", function(d) {
-                     if (d.Year == 2015) { return 6; }
-                     else { return 3; };
-                 });
-           })
-           .on("mouseover", function(d) {
-               tip.transition()
-                  .duration(200)
-                  .style("opacity", 0.8);
-               tip.html("<b>" + d.Year + "</b><br/>" + d.death)
-                  .style("left", (d3.event.pageX - 30) + "px")
-                  .style("top", (d3.event.pageY - 40) + "px");
-           })
-           .on("mouseout", function(d) {
-               tip.transition()
-                  .duration(500)
-                  .style("opacity", 0);
-           })
-           .on("click", function(d) {
-               if (d.Year == 2015) {
-                   zoomIn();
-                   //return pie2015();
-               };
            });
 
         // Add the X Axis
@@ -210,76 +221,6 @@ function byYear() {
            .attr("class", "axis")
            .attr("id", "y-axis")
            .call(yAxis);
-
-        function zoomIn() {
-            d3.selectAll(".year-dot").remove();
-
-            // First transition the line to the last six years
-            var t0 = svg.transition().duration(750);
-            t0.selectAll(".year-trend").attr("d", valueLine(dataZoomed));
-
-            // Then transition the x-axis
-            xScale.domain(d3.extent(dataZoomed, function(d) { return d.year; }));
-            yScale.domain(d3.extent(dataZoomed, function(d) { return d.death; }));
-            svg.selectAll(".year-dot2")
-               .data(dataZoomed)
-               .enter()
-               .append("circle")
-               .attr("class", "year-dot2")
-               .attr("r", function(d) {
-                   if (d.Year == 2015) { return 6; }
-                   else { return 3; };
-               })
-               .attr("cx", function(d) { return xScale(d.year); })
-               .attr("cy", function(d) { return yScale(d.death); })
-               .attr("fill", function(d) {
-                   if (d.Year == 2015) { return "#1abc9c"; }
-                   else { return "gray"};
-                })
-               .style("opacity", 0)
-               .on("mouseenter", function() {
-                    d3.select(this)
-                    .transition()
-                    .attr("r", function(d) {
-                        if (d.Year == 2015) { return 9; }
-                        else { return 6; };
-                    });
-                })
-                .on("mouseleave", function() {
-                    d3.select(this)
-                      .transition()
-                      .attr("r", function(d) {
-                          if (d.Year == 2015) { return 6; }
-                          else { return 3; };
-                       });
-                 })
-                 .on("mouseover", function(d) {
-                     tip.transition()
-                        .duration(200)
-                        .style("opacity", 0.8);
-                     tip.html("<b>" + d.Year + "</b><br/>" + d.death)
-                        .style("left", (d3.event.pageX - 30) + "px")
-                        .style("top", (d3.event.pageY - 40) + "px");
-                  })
-                  .on("mouseout", function(d) {
-                      tip.transition()
-                      .duration(500)
-                      .style("opacity", 0);
-                   });
-
-            var t1 = t0.transition();
-            t1.selectAll(".year-trend").attr("d", valueLine(dataZoomed));
-            t1.selectAll("#x-axis").call(xAxis);
-            t1.selectAll("#y-axis").call(yAxis);
-
-            // Third transition the dots
-            svg.selectAll(".year-dot2")
-               .transition()
-               .delay(750)
-               .duration(750)
-               .style("opacity", 1);
-
-        }
         
     });
 };
@@ -290,7 +231,7 @@ function byState(data, states, stateCode, stateAbbr) {
     // states and stateScale in the main function in script.js
     var margin = {top: 30, right: 100, bottom: 100, left: 100 },
         width = 1000 - margin.left - margin.right,
-        height = 600 - margin.top - margin.bottom;
+        height = 630 - margin.top - margin.bottom;
 
     var svgState = d3.select("#byState").append("svg")
                 .attr("width", width + margin.left + margin.right)
@@ -329,8 +270,8 @@ function byState(data, states, stateCode, stateAbbr) {
 
     var xScale = d3.scale.ordinal()
                          .domain(stateAbbr)
-                         .rangeRoundBands([0, width], .05);
-    var yScale = d3.scale.linear().domain([0,maxValue]).range([height, 0]);
+                         .rangeRoundBands([0, width]);
+    var yScale = d3.scale.linear().domain([0, maxValue + 500]).range([height, 0]);
 
     var xAxis = d3.svg.axis()
         .scale(xScale)
@@ -356,8 +297,8 @@ function byState(data, states, stateCode, stateAbbr) {
         .data(modeToUseNest)
         .enter().append("rect")
         .style("fill", "steelblue")
-        .attr("x", function(d,i) { return xScale(stateAbbr[i]); })
-        .attr("width", xScale.rangeBand())
+        .attr("x", function(d,i) { return xScale(stateAbbr[i]) + 1; })
+        .attr("width", xScale.rangeBand() - 1)
         .attr("y", function(d) { return yScale(d.values); })
         .attr("height", function(d) { return height - yScale(d.values); });
 }
@@ -420,8 +361,6 @@ function byType(typeDate) {
                         .style("text-anchor", "middle")
                         .attr("transform", "translate(" + gridSize / 2 + ", -6)")
                         .attr("class", function(d, i) { return ((i >= 7 && i <= 16) ? "timeLabel mono axis axis-worktime" : "timeLabel mono axis"); });
-
-
 
         /**************** Pie charts: for vehicle type with different level of fatality  *********************/
         var dataNest1 = d3.nest()
@@ -578,6 +517,89 @@ function byType(typeDate) {
                              .domain([0, buckets-1, 250])
                              .range(colors);
 
+        Array.prototype.diff = function(a) {
+                  return this.filter(function(i) {return a.indexOf(i) < 0;});
+              };
+        var originData = JSON.parse(JSON.stringify(dataNest3));
+
+        // function cleanData(){
+                // console.log(dataNest3);
+
+                // var indiceList = [];
+                // var indiceDiff = [];
+                // dataNest3.forEach(function(d, i){
+                //     indiceList.push(parseInt(d.key) - 1);
+                //     indiceDiff = d3.range(0, 6).diff(indiceList);           
+                // });
+                // for (i = 0 ; i < indiceDiff.length ; i++){
+                //    dataNest3.splice(indiceDiff[i], 0, {'key': String(indiceDiff[i] + 1),'values':[]});
+                // }; 
+
+                // dataNest3.forEach(function(d, i){
+                //     var indiceList = [];
+                //     d.values.forEach(function(v, i){
+                //       indiceList.push(parseInt(v.key) - 1);
+                //       });
+                //     var indiceDiff = d3.range(0, 7).diff(indiceList);
+                //     for (i = 0 ; i < indiceDiff.length ; i++){
+                //        d.values.splice(indiceDiff[i], 0, {'key': String(indiceDiff[i] + 1),'values':[]});
+                //     };
+                // });
+
+                // dataNest3.forEach(function(d, i){
+                //     d.values.forEach(function(v, i){
+                //       var indiceList = [];
+                //       v.values.forEach(function(sv, i){
+                //           indiceList.push(parseInt(sv.key) - 1);              
+                //       });
+                //       var indiceDiff = d3.range(0, 24).diff(indiceList);
+                //       console.log(indiceDiff);
+                //       for (i = 0 ; i < indiceDiff.length ; i++){
+                //          v.values.splice(indiceDiff[i], 0, {'key': String(indiceDiff[i] + 1),'values':0});
+                //       };                
+                //     });
+                // });
+
+                // dataNest3.forEach(function(d, i){
+                //     if (parseInt(d.key) == 3){
+                //       d.values.forEach(function(v, i){
+                //           if ((parseInt(v.key) == 2) || (parseInt(v.key) == 3)) {
+                //             v.values.pop();
+                //           }              
+                //       });
+                //     }
+                // });  
+        // }
+
+        var heatMapMatrix = []
+        for (i = 0; i<7; i++){
+          heatMapMatrix.push([]);
+        }
+        heatMapMatrix.forEach(function(l){
+            for (i = 0; i < 24; i++){
+              l.push(0);
+            }
+        });
+
+        heatMapMatrix.forEach(function(d, i) {     
+            d.forEach(function(g, ii) {
+                    svgHeatmap.selectAll("hour-bordered-basic")
+                     .data(heatMapMatrix)
+                     .enter()
+                     .append("rect")
+                     .attr("x", (ii) * gridSize)
+                     .attr("y", (i) * gridSize)
+                     .attr("rx", 4)
+                     .attr("ry", 4)
+                     .attr("class", "hour-bordered-basic")
+                     .attr("width", gridSize - 3)
+                     .attr("height", gridSize - 3)
+                     .style("fill", colorHeatmap(0))
+                     .style("opacity", 1);
+            });
+        });
+
+
         dataNest3.forEach(function(d, i) {     
             d.values.forEach(function(g, ii) {
                 g.values.forEach(function(v, iii) {
@@ -626,17 +648,17 @@ function byType(typeDate) {
 
         function commuteChange(){
             var commuteMode = ['-- Select Vehicle Type --',
-		               'Sedan/Hardtop/2-Door Coupe',
-	                   'Utility',
-					   'Van',
-					   'Light Vehicle',
-					   'Other',
-					   'Truck'];
-		    var commuteState = d3.select('#commute-select').property('value');
-		    var index = commuteMode.indexOf(commuteState);
-		    console.log(index);
-		    highlightType(index);
-	    };
+		                           'Sedan/Hardtop/2-Door Coupe',
+	                             'Utility',
+				                       'Van',
+					                     'Light Vehicle',
+					                     'Other',
+					                     'Truck'];
+    		    var commuteState = d3.select('#commute-select').property('value');
+    		    var index = commuteMode.indexOf(commuteState);
+    		    // console.log(index);
+    		    highlightType(index);
+	      };
 
         function highlightType(index) {
 
@@ -716,13 +738,33 @@ function byWeather(weatherData) {
     // Define the scales
     var timeFormat = d3.time.format('%I %p'),
         formatHours = function(d) { return timeFormat(new Date(2015, 1, 1, d)); };
+    
+    // Group data by weather
+    var dataNest = d3.nest()
+                     .key(function(d) { return d.WEATHER; })
+                     .key(function(d) { return d.hourtime; }).sortKeys(d3.ascending)
+                     .rollup(function(d) {
+                         return {
+                             hourScale: d3.mean(d, function(v) { return v.hourScale; }),
+                             avg: d3.sum(d, function(v) { return v.count; }) / d.length
+                         };
+                     })
+                     .entries(data);
+   
+   var maxAverageL = [];
+    dataNest.forEach(function(d){
+        d.values.forEach(function(v){
+          maxAverageL.push(v.values.avg);
+        });
+    });
+    var maxAvg = d3.max(maxAverageL);
 
     var xScale = d3.scale.linear()
                           .domain([0, 24])
                           .range([0, width]);
 
     var yScale = d3.scale.linear()
-                         .domain([0.8, 2.2])
+                         .domain([0.9, maxAvg + 0.2])
                          .range([height, 0]);
 
     // Define the axis
@@ -751,18 +793,6 @@ function byWeather(weatherData) {
                         .x(function(d) { return d.values.hourScale; })
                         .y(function(d) { return yScale(d.values.avg); });
 
-    // Group data by weather
-    var dataNest = d3.nest()
-                     .key(function(d) { return d.WEATHER; })
-                     .key(function(d) { return d.hourtime; }).sortKeys(d3.ascending)
-                     .rollup(function(d) {
-                         return {
-                             hourScale: d3.mean(d, function(v) { return v.hourScale; }),
-                             avg: d3.sum(d, function(v) { return v.count; }) / d.length
-                         };
-                     })
-                     .entries(data);
-    
     // froEach means drawing line for each key
     dataNest.forEach(function(d, i) {
         //console.log(d.values);
@@ -774,8 +804,6 @@ function byWeather(weatherData) {
            .attr("id", 'weather'+d.key)
            .attr("d", weatherLine(d.values))
            .attr("fill", "none");
-
-
     });
 
     svg.append("g")
@@ -785,13 +813,7 @@ function byWeather(weatherData) {
 
     svg.append("g")
        .attr("class", "axis")
-       .call(yAxis);
-
-    // svg.append("text")
-    //    .attr("x", 60)
-    //    .attr("y", 60)
-    //    .text("Average Death per Accident");
-         
+       .call(yAxis);        
 }
 
 function highlightLine() {
@@ -824,7 +846,6 @@ function highlightLine() {
            .attr("opacity", 1)
            .style("stroke-width", 7);
     };
- 
 };
 
 /* Statistics by Bad Behaviors */
@@ -847,6 +868,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
                            })
                            .entries(data);
 
+
     function chosenBehave(behave1, beheve2) {
         var behaveDataNestChosen = behaveDataNest.filter(function(d) { return d.key == behave1; })[0].values
                                              .filter(function(g) { return g.key == behave2; })[0].values;
@@ -856,13 +878,19 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
     var behaveDataNestChosen = chosenBehave(behave1, behave2);
     var behaveDataNestDefault = chosenBehave(0, 0);
 
+    var maxValueL = []
+    behaveDataNestChosen.forEach(function(d){
+        maxValueL.push(d.values);
+    });
+    maxValue = d3.max(maxValueL);
+
     // Define the scales
     var timeFormat = d3.time.format('%a'),
         formatYear = function(d) { return timeFormat(new Date(2015, 1, d)); };
 
     // Set the range
     var xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1).domain([1,2,3,4,5,6,7]);
-    var yScale = d3.scale.linear().range([height, 0]).domain([0.9, 1.3]);
+    var yScale = d3.scale.linear().range([height, 0]).domain([0.9, maxValue + 0.05]);
 
     // Define the axis
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(formatYear);
@@ -938,7 +966,6 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
           .attr("height", function(d) { return height - yScale(d.values); })
           .style("fill", "#999999")
     };             
-
 };
 
 
