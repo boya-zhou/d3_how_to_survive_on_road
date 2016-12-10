@@ -418,7 +418,7 @@ function byType(typeDate) {
                     tip.style('display','inline');
                   });
          arcsType.on("mousemove", function(d) {
-                   console.log(d3.event.pageY);
+                   // console.log(d3.event.pageY);
                    var percent = d3.format(",.2%")((d.endAngle - d.startAngle) / 6.283185307179586);
                    tip.style('left', d3.event.pageX - 10+ 'px');
                    tip.style('top', d3.event.pageY - 10 + 'px');
@@ -695,6 +695,7 @@ function blurMap(index) {
 function byWeather(weatherData) {
 
     var data = (JSON.parse(JSON.stringify(weatherData)));
+   // console.log(data);
 
     var margin = {top: 30, right: 100, bottom: 100, left: 100 },
         width = 1000 - margin.left - margin.right,
@@ -704,11 +705,12 @@ function byWeather(weatherData) {
     // Define the scales
     var timeFormat = d3.time.format('%I %p'),
         formatHours = function(d) { return timeFormat(new Date(2015, 1, 1, d)); };
-    
+    var formatDate = d3.time.format("%H");
+
     // Group data by weather
     var dataNest = d3.nest()
                      .key(function(d) { return d.WEATHER; })
-                     .key(function(d) { return d.hourtime; }).sortKeys(d3.ascending)
+                     .key(function(d) { return d.hour; }).sortKeys(d3.ascending)
                      .rollup(function(d) {
                          return {
                              hourScale: d3.mean(d, function(v) { return v.hourScale; }),
@@ -717,6 +719,53 @@ function byWeather(weatherData) {
                      })
                      .entries(data);
    
+    dataNest.forEach(function(d){
+        d.values.sort(function (a,b){
+          return parseInt(a.key) - parseInt(b.key);
+        })
+    });
+
+    var hourScaleSample = [];
+    dataNest[0].values.forEach(function(d){
+        hourScaleSample.push(d.values.hourScale);    
+    });
+    // console.log(hourScaleSample);
+
+    var hourFL = []
+    dataNest.forEach(function(d){
+      hourFL.push(d.key);
+    });
+    var hourFLDiff = ["1","2","3","4","5","10"].diff(hourFL);
+    hourFLDiff.forEach(function(d){
+      console.log(d)
+      dataNest.splice(parseInt(d) - 1, 0, {'key':d, 'values':[]});
+    });
+
+    var hourAL = [];
+    dataNest.forEach(function(d,i){
+        var hourL = [];
+
+        d.values.forEach(function(v){
+          hour = parseInt(v.key);
+          hourL.push(hour);
+        }); 
+        var hourDiff = d3.range(0,24).diff(hourL);
+        hourAL[i] = hourDiff;
+    });
+    if (hourAL[0].length == 0){
+        for (var i = 0; i < 6; i ++){
+          hourAL[i].forEach(function(v){
+            dataNest[i].values.splice((parseInt(v) - 1), 0, {'key': String(v),'values': {'avg':0, 'hourScale':hourScaleSample[v]}});
+          });
+        }
+    }
+    dataNest.forEach(function(d){
+        d.values.sort(function (a,b){
+          return parseInt(a.key) - parseInt(b.key);
+        })
+    });
+    console.log(dataNest); 
+
    var maxAverageL = [];
     dataNest.forEach(function(d){
         d.values.forEach(function(v){
@@ -730,7 +779,7 @@ function byWeather(weatherData) {
                           .range([0, width]);
 
     var yScale = d3.scale.linear()
-                         .domain([0.9, maxAvg + 0.2])
+                         .domain([0, maxAvg + 0.2])
                          .range([height, 0]);
 
     // Define the axis
@@ -738,11 +787,9 @@ function byWeather(weatherData) {
                              .orient("bottom")
                              .tickValues([0,3,6,9,12,15,18,21,24])
                              .tickFormat(formatHours);
-
     
     var yAxis = d3.svg.axis().scale(yScale)
-                             .orient("left")
-                             .tickValues([1.0, 1.3, 1.6, 1.9, 2.2]);
+                             .orient("left");
 
     var color = d3.scale.category20();
 
