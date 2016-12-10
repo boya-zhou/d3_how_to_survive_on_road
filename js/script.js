@@ -737,7 +737,7 @@ function byWeather(weatherData) {
     });
     var hourFLDiff = ["1","2","3","4","5","10"].diff(hourFL);
     hourFLDiff.forEach(function(d){
-      console.log(d)
+      // console.log(d)
       dataNest.splice(parseInt(d) - 1, 0, {'key':d, 'values':[]});
     });
 
@@ -764,7 +764,7 @@ function byWeather(weatherData) {
           return parseInt(a.key) - parseInt(b.key);
         })
     });
-    console.log(dataNest); 
+    // console.log(dataNest); 
 
    var maxAverageL = [];
     dataNest.forEach(function(d){
@@ -902,8 +902,8 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
         formatYear = function(d) { return timeFormat(new Date(2015, 1, d)); };
 
     // Set the range
-    var xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1).domain([1,2,3,4,5,6,7]);
-    var yScale = d3.scale.linear().range([height, 0]).domain([0.9, maxValue + 0.05]);
+    var xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1).domain(["1","2","3","4","5","6","7"]);
+    var yScale = d3.scale.linear().range([height, 0]).domain([-.1, maxValue + 0.05]);
 
     // Define the axis
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(formatYear);
@@ -918,6 +918,16 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
                       .append("g")
                       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
+    console.log(behaveDataNestChosen);
+    var weekday = [];
+    behaveDataNestChosen.forEach(function(d){
+        weekday.push(parseInt(d.key));
+    });
+    // console.log(weekday)
+    var weekDiff = [1,2,3,4,5,6,7].diff(weekday);
+    weekDiff.forEach(function(d){
+        behaveDataNestChosen.splice((parseInt(d) -1), 0, {"key" : String(d), "values": 0});
+    });
     svgBehave.selectAll(".bar-behave-chosen")
              .data(behaveDataNestChosen)
              .enter()
@@ -968,9 +978,22 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
                                            .filter(function(g) { return g.key == distracted; })[0].values;
             return behaveDataNestChosen;
         };    
-    
+        // console.log(chosenBehave(speeding, distracted));
+
+        var dataChosenBe = chosenBehave(speeding, distracted);
+        var weekday = [];
+        dataChosenBe.forEach(function(d){
+            weekday.push(parseInt(d.key));
+        });
+        // console.log(weekday)
+        var weekDiff = [1,2,3,4,5,6,7].diff(weekday);
+        weekDiff.forEach(function(d){
+            dataChosenBe.splice((parseInt(d) -1), 0, {"key" : String(d), "values": 0});
+        });
+        console.log(dataChosenBe);
+
         d3.selectAll(".bar-behave-chosen")
-          .data(chosenBehave(speeding, distracted))
+          .data(dataChosenBe)
           .transition()
           .duration(750)
           .attr("x", function(d) { return xScale(d.key); })
