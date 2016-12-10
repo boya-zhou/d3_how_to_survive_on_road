@@ -10,19 +10,23 @@ function selectMenu(){
 	var statesSelect = d3.select('#state')
 	 	.append('select')
 	 	.attr('id','state-select')
-	 	.attr('class','selectMenu')
-	 	.on('change', stateChange);
+	 	.attr('class','selectMenu');
+	 	// .on('change', stateChange);
 
 	var stateOptions = statesSelect.selectAll('option')
 		.data(states)
 		.enter()
 		.append('option')
+		.attr('value',function(d){return d;})
 		.text(function(d) {return d;});
 
-	function stateChange(){
-		var selectState = d3.select('#state-select').property('value');
-		return selectState;
-	};
+	// function stateChange(){
+	// 	var selectState = d3.select('#state-select').property('value');
+	// 	return selectState;
+	// };
+	$("option[value='-- Select State --']")
+	  .attr("disabled", "disabled")
+	  .siblings().removeAttr("disabled");
 
 	var commuteMode = ['-- Select Vehicle Type --',
 		               'Sedan/Hardtop/2-Door Coupe',
@@ -42,8 +46,13 @@ function selectMenu(){
 		.data(commuteMode)
 		.enter()
 		.append('option')
+		.attr('value',function(d, i){return i;})
 		.text(function(d) { return d; });
-
+	
+	$("option[value='0']")
+	  .attr("disabled", "disabled")
+	  .siblings().removeAttr("disabled");
+	
 	d3.select("#weatherVar")
 	  .on("change", highlightLine);
 

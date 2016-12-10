@@ -58,6 +58,18 @@ $(document).ready(function() {
                                  .key(function(d) { return d.BODY_TYP2; })
                                  .entries(stateResult);
 
+            var modeChosen = [];
+            dataNestType.forEach(function(d){
+                modeChosen.push(d.key);
+            });
+
+            var modeDiff = ["1", "2", "3", "4", "5", "6"].diff(modeChosen);
+            modeDiff.forEach(function(d){
+                  $("option[value=" + d + "]")
+                    .attr("disabled", "disabled")
+                    .siblings().removeAttr("disabled");
+            });
+
             d3.select("#byTypePie").remove();
             d3.select("#byTypeHeatmap").remove();
 
@@ -71,7 +83,6 @@ $(document).ready(function() {
                     var blurList =  [0,1,2,3,4,5];
 
                     if (index == 0) {
-                
                         // Dealing with pie
                         d3.selectAll(".arcsType")
                           .transition()
@@ -83,7 +94,6 @@ $(document).ready(function() {
                               .duration(500)
                               .style("opacity", 0.7);
                         });
-                
                         // Dealing with heatmap
                         highlightMap(0);
                     }
@@ -116,7 +126,8 @@ $(document).ready(function() {
                     };
                 };              
                 var vehicleType = ["Sedan/Hardtop/2-Door Coupe", "Utility", "Van", "Light Vehicle", "Other", "Truck"];
-                var selectType = vehicleType.indexOf(d3.select('#commute-select').property('value')) + 1;
+                var selectType = d3.select('#commute-select').property('value');
+
                 var typeResult = dataNestType.filter(function(d) { return d.key == selectType; })[0].values;
                 highlightType(selectType);
               };
@@ -385,9 +396,10 @@ function byType(typeDate) {
 
         var pie1 = pieType(dataNest1);
 
-        var tip = d3.select("#vis-byType")
+        var tip = d3.select("body")
                     .append("div")
-                    .attr("class", "tooltip-type");
+                    .attr("class", "tooltip-type")
+                    .style('display','none');
 
         var typeScale = d3.scale.ordinal()
                           .domain(["1", "2", "3", "4", "5", "6"])
@@ -400,17 +412,23 @@ function byType(typeDate) {
                              .attr("class", "arcsType")
                              .attr("id", function(d) { return 'type'+d.data.key; })
                              .attr("d", arcType)
-                             .style("fill", function(d) { return colorPie(d.data.key); })
-                             .on("mouseover", function(d) {
-                                 var percent = d3.format(",.2%")((d.endAngle - d.startAngle) / 6.283185307179586);
-                                 tip.html("<b>" + typeScale(d.data.key) + "</b><br/>" + d.value + "<br/>" + percent)
-                                    .style('top', (d3.event.pageY + 10) + 'px')
-                                    .style('left', (d3.event.pageX + 10) + 'px')
-                                    .style("display", "block");
-                                })
-                             .on("mouseout", function(d) {
-                                 tip.style("display", "none");
-                                });
+                             .style("fill", function(d) { return colorPie(d.data.key); });
+
+         arcsType.on('mouseover', function(d){
+                    tip.style('display','inline');
+                  });
+         arcsType.on("mousemove", function(d) {
+                   console.log(d3.event.pageY);
+                   var percent = d3.format(",.2%")((d.endAngle - d.startAngle) / 6.283185307179586);
+                   tip.style('left', d3.event.pageX - 10+ 'px');
+                   tip.style('top', d3.event.pageY - 10 + 'px');
+                   tip.style("display", "block");
+                   tip.html("<b>" + typeScale(d.data.key) + "</b><br/>" + d.value + "<br/>" + percent);
+                  });
+
+          arcsType.on("mouseout", function(d) {
+                   tip.style("display", "none");
+                  });
         
         var legendPie = svgPie.selectAll(".legend-pie")
                               .data(vehicleType)
@@ -430,9 +448,6 @@ function byType(typeDate) {
                  .text(function(d) { return d; })
                  .attr("x", width / 4 + 90)
                  .attr("y", function(d, i) { return i * 25 - 135; });
-
-
-
 
         var colorLvl = d3.scale.ordinal().domain(fatalNum).range(colorsFatal);
 
@@ -521,55 +536,6 @@ function byType(typeDate) {
                   return this.filter(function(i) {return a.indexOf(i) < 0;});
               };
         var originData = JSON.parse(JSON.stringify(dataNest3));
-
-        // function cleanData(){
-                // console.log(dataNest3);
-
-                // var indiceList = [];
-                // var indiceDiff = [];
-                // dataNest3.forEach(function(d, i){
-                //     indiceList.push(parseInt(d.key) - 1);
-                //     indiceDiff = d3.range(0, 6).diff(indiceList);           
-                // });
-                // for (i = 0 ; i < indiceDiff.length ; i++){
-                //    dataNest3.splice(indiceDiff[i], 0, {'key': String(indiceDiff[i] + 1),'values':[]});
-                // }; 
-
-                // dataNest3.forEach(function(d, i){
-                //     var indiceList = [];
-                //     d.values.forEach(function(v, i){
-                //       indiceList.push(parseInt(v.key) - 1);
-                //       });
-                //     var indiceDiff = d3.range(0, 7).diff(indiceList);
-                //     for (i = 0 ; i < indiceDiff.length ; i++){
-                //        d.values.splice(indiceDiff[i], 0, {'key': String(indiceDiff[i] + 1),'values':[]});
-                //     };
-                // });
-
-                // dataNest3.forEach(function(d, i){
-                //     d.values.forEach(function(v, i){
-                //       var indiceList = [];
-                //       v.values.forEach(function(sv, i){
-                //           indiceList.push(parseInt(sv.key) - 1);              
-                //       });
-                //       var indiceDiff = d3.range(0, 24).diff(indiceList);
-                //       console.log(indiceDiff);
-                //       for (i = 0 ; i < indiceDiff.length ; i++){
-                //          v.values.splice(indiceDiff[i], 0, {'key': String(indiceDiff[i] + 1),'values':0});
-                //       };                
-                //     });
-                // });
-
-                // dataNest3.forEach(function(d, i){
-                //     if (parseInt(d.key) == 3){
-                //       d.values.forEach(function(v, i){
-                //           if ((parseInt(v.key) == 2) || (parseInt(v.key) == 3)) {
-                //             v.values.pop();
-                //           }              
-                //       });
-                //     }
-                // });  
-        // }
 
         var heatMapMatrix = []
         for (i = 0; i<7; i++){

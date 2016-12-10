@@ -60,6 +60,20 @@
   text-anchor: middle;
 }
 
+.tooltip-type {
+  position: absolute;
+  text-align: left;
+  width: 180px;
+  height: 120px;
+  padding: 8px;
+  margin-top: -20px;
+  font: 20px sans-serif;
+  background: #ddd;
+  opacity: .8;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
 .axis line,
 .axis path {
   fill: none;
