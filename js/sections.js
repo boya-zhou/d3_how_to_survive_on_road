@@ -34,7 +34,8 @@ function selectMenu(){
 					   'Van',
 					   'Light Vehicle',
 					   'Other',
-					   'Truck'];
+					   'Truck',
+					   'Back'];
 
 	var commuteSelect = d3.select('#commute')
 	 	.append('select')
@@ -50,9 +51,11 @@ function selectMenu(){
 		.text(function(d) { return d; });
 	
 	$("option[value='0']")
-	  .attr("disabled", "disabled")
-	  .siblings().removeAttr("disabled");
-	
+	  .attr("disabled", "disabled");
+
+	$("option[value='7']")
+	  .attr("disabled", "disabled");
+
 	d3.select("#weatherVar")
 	  .on("change", highlightLine);
 

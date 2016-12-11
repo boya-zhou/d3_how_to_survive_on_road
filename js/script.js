@@ -24,7 +24,7 @@ $(document).ready(function() {
         // Select state
         var dataNestState = d3.nest()
                               .key(function(d) { return d.STATE; })
-                              .entries(data);
+                              .entries(data); 
 
         var states = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware',
                       'Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts',
@@ -63,11 +63,20 @@ $(document).ready(function() {
                 modeChosen.push(d.key);
             });
 
-            var modeDiff = ["1", "2", "3", "4", "5", "6"].diff(modeChosen);
+            // console.log(modeChosen);
+
+            $("option[value='-- Select Weather --']")
+              .attr("disabled", "disabled");
+
+            $("option[value='0']")
+              .siblings().removeAttr("disabled");
+
+            var modeDiff = ["0", "1", "2", "3", "4", "5", "6", "7"].diff(modeChosen);
+            
             modeDiff.forEach(function(d){
                   $("option[value=" + d + "]")
-                    .attr("disabled", "disabled")
-                    .siblings().removeAttr("disabled");
+                    .attr("disabled", "disabled");
+                    // console.log('trigger');
             });
 
             d3.select("#byTypePie").remove();
@@ -79,10 +88,11 @@ $(document).ready(function() {
             function changeType() {
 
                 function highlightType(index) {
+                    console.log(index);
 
                     var blurList =  [0,1,2,3,4,5];
 
-                    if (index == 0) {
+                    if (index == 7) {
                         // Dealing with pie
                         d3.selectAll(".arcsType")
                           .transition()
@@ -128,8 +138,10 @@ $(document).ready(function() {
                 var vehicleType = ["Sedan/Hardtop/2-Door Coupe", "Utility", "Van", "Light Vehicle", "Other", "Truck"];
                 var selectType = d3.select('#commute-select').property('value');
 
-                var typeResult = dataNestType.filter(function(d) { return d.key == selectType; })[0].values;
+                // var typeResult = dataNestType.filter(function(d) { return d.key == selectType; })[0].values;
                 highlightType(selectType);
+                $("option[value='7']")
+                  .removeAttr("disabled");
               };
 
             // Select weather
@@ -725,10 +737,10 @@ function byWeather(weatherData) {
         })
     });
 
-    var hourScaleSample = [];
-    dataNest[0].values.forEach(function(d){
-        hourScaleSample.push(d.values.hourScale);    
-    });
+    var hourScaleSample = [0, 34.78260869565203, 69.56521739130406, 104.34782608695791, 139.13043478260815, 173.91304347825977, 208.69565217391641, 243.47826086956718, 278.2608695652163, 313.04347826086644, 347.8260869565188, 382.6086956521673, 417.3913043478336, 452.1739130434717, 486.95652173913476, 521.7391304347774, 556.5217391304437, 591.3043478260819, 626.0869565217309, 660.8695652173997, 695.6521739130569, 730.4347826086758, 765.2173913043313, 800];
+    // dataNest[0].values.forEach(function(d){
+    //     hourScaleSample.push(d.values.hourScale);    
+    // });
     // console.log(hourScaleSample);
 
     var hourFL = []
@@ -752,10 +764,18 @@ function byWeather(weatherData) {
         var hourDiff = d3.range(0,24).diff(hourL);
         hourAL[i] = hourDiff;
     });
-    if (hourAL[0].length == 0){
+    // console.log(hourAL);
+    var countChange = 0;
+    hourAL.forEach(function(d){
+      // console.log(d);
+      countChange += d.length;
+    });
+    // console.log(countChange);
+    if (countChange > 0){
         for (var i = 0; i < 6; i ++){
           hourAL[i].forEach(function(v){
-            dataNest[i].values.splice((parseInt(v) - 1), 0, {'key': String(v),'values': {'avg':0, 'hourScale':hourScaleSample[v]}});
+            // console.log(hourScaleSample[v]);
+            dataNest[i].values.splice(v, 0, {'key': String(v),'values': {'avg':0, 'hourScale':hourScaleSample[v]}});
           });
         }
     }
@@ -834,7 +854,7 @@ function highlightLine() {
     var svg = d3.select("#byWeather");
     weatherVar = document.getElementById('weatherVar').value;
 
-    if (weatherVar == 0) {
+    if (weatherVar == 11) {
         svg.selectAll(".weatherLine")
            .transition()
            .duration(600)
@@ -903,7 +923,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
 
     // Set the range
     var xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1).domain(["1","2","3","4","5","6","7"]);
-    var yScale = d3.scale.linear().range([height, 0]).domain([-.1, maxValue + 0.05]);
+    var yScale = d3.scale.linear().range([height, 0]).domain([-.1, maxValue + 0.5]);
 
     // Define the axis
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(formatYear);
@@ -918,7 +938,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
                       .append("g")
                       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
-    console.log(behaveDataNestChosen);
+    // console.log(behaveDataNestChosen);
     var weekday = [];
     behaveDataNestChosen.forEach(function(d){
         weekday.push(parseInt(d.key));
