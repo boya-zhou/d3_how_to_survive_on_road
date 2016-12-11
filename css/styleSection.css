@@ -48,6 +48,21 @@
     -webkit-appearance: none;
 }
 
+#btnOperate {
+    padding: 5px 8px;
+    width : 40%;
+    background: rgba(0,0,0,0);
+    border: 2px solid #ccc;
+    box-shadow: none;
+}
+
+#checkbox1, #checkbox2  {
+    background: rgba(0,0,0,0);
+    border: 2px solid #ccc;
+    opacity: .7;
+    box-shadow: none;
+}
+
 .vis {
   top: 150px;
   height: 700px;

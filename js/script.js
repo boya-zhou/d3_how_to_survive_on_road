@@ -149,6 +149,9 @@ $(document).ready(function() {
             byWeather(stateResult);
 
 
+            $("#checkbox1").prop("checked", true);
+            $("#checkbox2").prop("checked", false);
+
             // Select behavior
             d3.select("#byBehave").remove();
             byBehave(behave1=1, behave2=0, behaveData=stateResult);
@@ -793,13 +796,23 @@ function byWeather(weatherData) {
         });
     });
     var maxAvg = d3.max(maxAverageL);
+    // console.log(maxAvg);
+    var sqrtAvg = Math.pow(maxAvg, 1/3);
+    var sqrtAvgL = d3.range(0, sqrtAvg + 0.1, sqrtAvg/30);
+    // console.log(sqrtAvgL);
+    var avgL = [];
+    sqrtAvgL.forEach(function(d, i){
+      if ([16,22,25,27,28,29,30].includes(i)){
+        avgL.splice(i, 0, Math.pow(d, 3));
+      }
+    });
 
     var xScale = d3.scale.linear()
                           .domain([0, 24])
                           .range([0, width]);
 
-    var yScale = d3.scale.linear()
-                         .domain([0, maxAvg + 0.2])
+    var yScale = d3.scale.pow().exponent(2)
+                         .domain([0, maxAvg + 0.05])
                          .range([height, 0]);
 
     // Define the axis
@@ -809,7 +822,8 @@ function byWeather(weatherData) {
                              .tickFormat(formatHours);
     
     var yAxis = d3.svg.axis().scale(yScale)
-                             .orient("left");
+                             .orient("left")
+                             .tickValues(avgL);
 
     var color = d3.scale.category20();
 
@@ -846,6 +860,7 @@ function byWeather(weatherData) {
 
     svg.append("g")
        .attr("class", "axis")
+       .attr('id','wea-y-axis')
        .call(yAxis);        
 }
 
@@ -911,11 +926,17 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
     var behaveDataNestChosen = chosenBehave(behave1, behave2);
     var behaveDataNestDefault = chosenBehave(0, 0);
 
-    var maxValueL = []
+    var maxValueL = [],
+        maxValueL2 = [];
+
     behaveDataNestChosen.forEach(function(d){
         maxValueL.push(d.values);
     });
-    maxValue = d3.max(maxValueL);
+
+    behaveDataNestDefault.forEach(function(d){
+        maxValueL2.push(d.values);
+    });
+    var maxValue = d3.max(maxValueL.concat(maxValueL2));
 
     // Define the scales
     var timeFormat = d3.time.format('%a'),
@@ -923,7 +944,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
 
     // Set the range
     var xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1).domain(["1","2","3","4","5","6","7"]);
-    var yScale = d3.scale.linear().range([height, 0]).domain([-.1, maxValue + 0.5]);
+    var yScale = d3.scale.linear().range([height, 0]).domain([-.1, maxValue + 0.3]);
 
     // Define the axis
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(formatYear);
@@ -978,12 +999,13 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
     // Add the Y Axis
     svgBehave.append("g")
              .attr("class", "axis")
+             .attr("id", "be-y-axis")
              .call(yAxis);
 
-    svgBehave.append("text")
-             .attr("x", 10)
-             .attr("y", 10)
-             .text("Average Death per Accident");
+    // svgBehave.append("text")
+    //          .attr("x", 10)
+    //          .attr("y", 10)
+    //          .text("Average Death per Accident");
 
     d3.select("#btnOperate")
       .on("click", clickSubmit);
@@ -999,8 +1021,20 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
             return behaveDataNestChosen;
         };    
         // console.log(chosenBehave(speeding, distracted));
-
         var dataChosenBe = chosenBehave(speeding, distracted);
+
+        var maxValueL = [],
+            maxValueL2 = [];
+
+        dataChosenBe.forEach(function(d){
+            maxValueL.push(d.values);
+        });
+
+        behaveDataNestDefault.forEach(function(d){
+            maxValueL2.push(d.values);
+        });
+        var maxValue = d3.max(maxValueL.concat(maxValueL2));
+
         var weekday = [];
         dataChosenBe.forEach(function(d){
             weekday.push(parseInt(d.key));
@@ -1010,7 +1044,10 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
         weekDiff.forEach(function(d){
             dataChosenBe.splice((parseInt(d) -1), 0, {"key" : String(d), "values": 0});
         });
-        console.log(dataChosenBe);
+        // console.log(dataChosenBe);
+
+        yScale.domain([0, maxValue + 0.3]);
+        var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(6);
 
         d3.selectAll(".bar-behave-chosen")
           .data(dataChosenBe)
@@ -1021,6 +1058,9 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
           .attr("width", xScale.rangeBand())
           .attr("height", function(d) { return height - yScale(d.values); })
           .style("fill", "#999999")
+        
+        d3.select('#be-y-axis')
+          .call(yAxis);
     };             
 };
 
