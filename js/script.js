@@ -54,6 +54,10 @@ $(document).ready(function() {
             // remove states that did not appear
             // adjust the scale
 
+            $('#commute-select option:eq(1)').prop('selected', true);
+            $('#weatherVar option:eq(0)').prop('selected', true);
+
+
             var stateScale = d3.scale.ordinal().domain(states).range(stateCode);
             var selectedState = stateScale(d3.select('#state-select').property('value'));
             var stateResult = dataNestState.filter(function(d) { return d.key == selectedState; })[0].values;
@@ -98,7 +102,7 @@ $(document).ready(function() {
             d3.select("#commute-select").on("change", changeType);
 
             d3.selectAll('.state-rect').style('fill','#2196F3');
-            d3.select('#state-rect-' + selectedState).transition().duration(750).style('fill','#FFC107');
+            d3.select('#state-rect-' + selectedState).transition().duration(750).style('fill','#F44336');
 
             function changeType() {
 
@@ -181,6 +185,7 @@ function byYear() {
         height = 600 - margin.top - margin.bottom
     // Format date
     var date = d3.time.format("%Y").parse;
+    var aToA = 70;
 
     // Set the range
     var xScale = d3.time.scale().range([0, width]);
@@ -200,6 +205,18 @@ function byYear() {
                 .attr('height',height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.select("#byYear")
+       .append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform","translate("+ ((width + margin.left + margin.right)/2) + "," + (margin.top/2) + ")")
+       .text("Number of Accidents in Each Year");
+
+    svg.append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform","translate("+ (width/2) + "," + (height + aToA) + ")")
+       .text("Year")
+       .style("font-size","18px");
 
     var tip = d3.select("#vis-byYear")
                 .append("div")
@@ -243,7 +260,7 @@ function byYear() {
            .attr("cx", function(d) { return xScale(d.year); })
            .attr("cy", function(d) { return yScale(d.death); })
            .attr("fill", function(d) {
-               if (d.Year == 2015) { return "#1abc9c"; }
+               if (d.Year == 2015) { return "#FF1744"; }
                else { return "gray"};
            });
 
@@ -270,13 +287,28 @@ function byState(data, states, stateCode, stateAbbr) {
     var margin = {top: 30, right: 100, bottom: 100, left: 100 },
         width = 1000 - margin.left - margin.right,
         height = 630 - margin.top - margin.bottom;
+    var aToA = 70;
 
-    var svgState = d3.select("#byState").append("svg")
+    var svgState = d3.select("#byState")
+                .append("svg")
+                .attr('id','state-outer')
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
+                .attr('id','state-inner')
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    d3.select("#state-outer")
+       .append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform","translate("+ ((margin.left + margin.right + width)/2) + "," + (margin.top/2) + ")")
+       .text("Number of Accidents in USA States");
+
+    svgState.append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform","translate("+ (width/2) + "," + (height + aToA) + ")")
+       .text("USA States")
+       .style("font-size","18px");
     // console.log(data);
     // update the list of array
     var stateFatal = data.map(function(d,i){
@@ -354,9 +386,9 @@ function byType(typeDate) {
         height = 600 - margin.top - margin.bottom,
         radius = (height - margin.top)/3,
         gridSize = Math.floor(width / 24),
-        legendElementWidth = (gridSize * 24) /10,
-        buckets = 10,
-        colors = ['#CCFF90','#F4FF81','#B2FF59','#EEFF41','#76FF03',"#FFCDD2","#E57373","#F44336","#D32F2F", "#B71C1C"], // alternatively colorbrewer.YlGnBu[9]
+        legendElementWidth = (gridSize * 24) /4,
+        buckets = 5,
+        colors = ["#FFEBEE","#FFCDD2","#EF5350", '#B71C1C'], // alternatively colorbrewer.YlGnBu[9]
         colorsPie = ['#2196F3','#795548', '#9C27B0','#FFC107','#009688','#607D8B'],
         // colorsPie = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6"],
         colorsFatal = ["#FFEBEE", "#FF8A80", "#D50000"],
@@ -366,6 +398,7 @@ function byType(typeDate) {
         vehicleType = ["Sedan/Hardtop/2-Door Coupe", "Utility", "Van", "Light Vehicle", "Other", "Truck"],
         fatalNum = ["1", "2", ">2"];
 
+    var aToA = 70;
 
     var svgPie = d3.select("#typeDiv")
                    .append("svg")
@@ -373,8 +406,35 @@ function byType(typeDate) {
                    .attr("height", height + margin.top + margin.bottom)
                    .attr("width", width + margin.left + margin.right)
                    .append("g")
+                   .attr('id','donut-inner')
                    .attr("transform", "translate(" + 2 * radius + margin.left + "," + 2 * radius + margin.top + ")");
     
+    d3.select("#donut-inner")
+       .append("text")
+       .attr("transform","translate("+ ((width/3) - 20) + "," + (-height/3) + ")")
+       .text("Inner Circle : Number of Accidents");
+
+    d3.select("#donut-inner")
+       .append("text")
+       .attr("transform","translate("+ ((width/3) - 20) + "," + ((-height/3) + 25) + ")")
+       .text("in Different Commute Mode");
+
+    d3.select("#donut-inner")
+       .append("text")
+       .attr("transform","translate("+ ((width/3) - 20) + "," + ((height/3) - 90) + ")")
+       .text("Outer Circle : Corresponding Death Tolls");
+
+    d3.select("#donut-inner")
+       .append("text")
+       .attr("transform","translate("+ ((width/3) - 20) + "," + ((height/3) - 65) + ")")
+       .text("for Different Commute Mode");
+
+    // d3.select("#donut-outer")
+    //    .append("text")
+    //    .attr("text-anchor", "middle")
+    //    .attr("transform","translate("+ ((margin.left + margin.right + width)/2) + "," + (margin.top/4) + ")")
+    //    .text("Number of Accidents in Different Commute Mode");
+
     var svgHeatmap = d3.select("#typeDiv")
                        .append("svg")
                        .attr("id", "byTypeHeatmap")
@@ -382,6 +442,13 @@ function byType(typeDate) {
                        .attr("width", width + margin.left + margin.right)
                        .append("g")
                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.select("#byTypePie")
+       .append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform","translate("+ ((margin.left + margin.right + width)/2) +
+               "," + (height + margin.top + margin.bottom) * 0.99 + ")")
+       .text("Average Death Toll per Accident in Certain Commute Related with Weekday and Time");    
 
     var dayLabels = svgHeatmap.selectAll(".dayLabel")
                        .data(days)
@@ -470,7 +537,7 @@ function byType(typeDate) {
         
         legendPie.append("rect")
                  .attr("x", width / 4 + 50)
-                 .attr("y", function(d, i) { return i * 25 - 150; })
+                 .attr("y", function(d, i) { return i * 25 - 110; })
                  .attr("height", 20)
                  .attr("width", 30)
                  .style("fill", function(d, i) { return colorsPie[i]; });
@@ -479,7 +546,7 @@ function byType(typeDate) {
                  .attr("class", "mono-pie")
                  .text(function(d) { return d; })
                  .attr("x", width / 4 + 90)
-                 .attr("y", function(d, i) { return i * 25 - 135; });
+                 .attr("y", function(d, i) { return i * 25 - 95; });
 
         var colorLvl = d3.scale.ordinal().domain(fatalNum).range(colorsFatal);
 
@@ -535,7 +602,7 @@ function byType(typeDate) {
         
         legendFatal.append("rect")
                  .attr("x", width / 4 + 50)
-                 .attr("y", function(d, i) { return i * 25 + 50; })
+                 .attr("y", function(d, i) { return i * 25 + 115; })
                  .attr("height", 20)
                  .attr("width", 30)
                  .style("fill", function(d, i) { return colorsFatal[i]; });
@@ -544,9 +611,10 @@ function byType(typeDate) {
                  .attr("class", "mono-pie")
                  .text(function(d, i) { return "Traffic Death Toll: " + fatalNum[i]; })
                  .attr("x", width / 4 + 90)
-                 .attr("y", function(d, i) { return i * 25 + 65; });
+                 .attr("y", function(d, i) { return i * 25 + 130; });
         
         legendFatal.style("display", "block");
+
 
 
         
@@ -556,12 +624,12 @@ function byType(typeDate) {
                           .key(function(d) { return d.day; })
                           .key(function(d) { return d.hour; })
                           .rollup(function(d) {
-                              return d3.sum(d, function(v) { return v.count; });
+                              return d3.sum(d, function(v) { return v.count; }) / d.length;
                           })
                           .entries(data);
 
         var colorHeatmap = d3.scale.quantile()
-                             .domain([0, buckets-1, 250])
+                             .domain([1, buckets-1, 2])
                              .range(colors);
 
         Array.prototype.diff = function(a) {
@@ -620,7 +688,7 @@ function byType(typeDate) {
 
         // Define the legend
         var legendHeatmap = svgHeatmap.selectAll(".legend-heatmap")
-                            .data([25, 50, 75, 100, 125, 150, 175, 200, 225, 250])
+                            .data([1.25, 1.50, 1.75, 2.00])
                             .enter()
                             .append("g")
                             .attr("class", "legend-heatmap");
@@ -735,6 +803,7 @@ function byWeather(weatherData) {
         height = 600 - margin.top - margin.bottom,
         padding = 50;
 
+    var aToA = 70;
     // Define the scales
     var timeFormat = d3.time.format('%I %p'),
         formatHours = function(d) { return timeFormat(new Date(2015, 1, 1, d)); };
@@ -814,16 +883,17 @@ function byWeather(weatherData) {
         });
     });
     var maxAvg = d3.max(maxAverageL);
+    var minAvg = d3.min(maxAverageL);
     // console.log(maxAvg);
-    var sqrtAvg = Math.pow(maxAvg, 1/3);
-    var sqrtAvgL = d3.range(0, sqrtAvg + 0.1, sqrtAvg/30);
-    // console.log(sqrtAvgL);
-    var avgL = [];
-    sqrtAvgL.forEach(function(d, i){
-      if ([16,22,25,27,28,29,30].includes(i)){
-        avgL.splice(i, 0, Math.pow(d, 3));
-      }
-    });
+    // var sqrtAvg = Math.pow(maxAvg, 1/3);
+    // var sqrtAvgL = d3.range(0, sqrtAvg + 0.1, sqrtAvg/30);
+    // // console.log(sqrtAvgL);
+    // var avgL = [];
+    // sqrtAvgL.forEach(function(d, i){
+    //   if ([16,22,25,27,28,29,30].includes(i)){
+    //     avgL.splice(i, 0, Math.pow(d, 3));
+    //   }
+    // });
 
     var keyList = [];
     dataNest.forEach(function(d, i){
@@ -835,8 +905,8 @@ function byWeather(weatherData) {
                           .domain([0, 24])
                           .range([0, width]);
 
-    var yScale = d3.scale.pow().exponent(2)
-                         .domain([0, maxAvg + 0.05])
+    var yScale = d3.scale.linear()
+                         .domain([minAvg - 0.1, maxAvg + 0.1])
                          .range([height, 0]);
 
     // Define the axis
@@ -847,13 +917,13 @@ function byWeather(weatherData) {
     
     var yAxis = d3.svg.axis().scale(yScale)
                              .orient("left")
-                             .tickValues(avgL);
+                             .ticks(10);
 
     var color = d3.scale.ordinal()
                         .range(['#2196F3','#795548', '#9C27B0','#FFC107','#009688','#607D8B'])
                         .domain(keyList);
 
-    console.log(color('1'));
+    // console.log(color('1'));
     var svg = d3.select("#svg-weather")
                 .append("svg")
                 .attr("id", "byWeather")
@@ -861,6 +931,18 @@ function byWeather(weatherData) {
                 .attr("width", width + margin.left + margin.right)
                 .append('g')
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.select("#byWeather")
+       .append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform","translate("+ ((width + margin.left + margin.right)/2) + "," + (margin.top/2) + ")")
+       .text("Average Death Tolls per Accident in Under Different Weather");
+
+    svg.append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform","translate("+ (width/2) + "," + (height + aToA) + ")")
+       .text("Hour")
+       .style("font-size","18px");
 
     // Define the line
     var weatherLine = d3.svg.line()
@@ -933,6 +1015,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
         height = 600 - margin.top - margin.bottom,
         barPadding = 22.5;
 
+    var aToA = 70;
     var behaveDataNest = d3.nest()
                            .key(function(d) { return d.SPEEDREL2; })
                            .key(function(d) { return d.MDRDSTRD2; })
@@ -987,6 +1070,18 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
                       .append("g")
                       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
+    d3.select("#byBehave")
+       .append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform","translate("+ ((width + margin.left + margin.right)/2) + "," + (margin.top/2) + ")")
+       .text("Average Death Tolls per Accident Related with Bad Driving Behaviors");
+
+    svgBehave.append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform","translate("+ (width/2) + "," + (height + aToA) + ")")
+       .text("Weekday")
+       .style("font-size","18px");
+
     // console.log(behaveDataNestChosen);
     var weekday = [];
     behaveDataNestChosen.forEach(function(d){

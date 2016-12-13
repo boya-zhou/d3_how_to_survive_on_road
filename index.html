@@ -21,6 +21,7 @@
       </div>
       <div class="col-lg-9">
         <div class='vis' id="vis-byYear">
+            <br></br><br></br>
             <svg id="byYear"></svg>
         </div>
       </div>
@@ -34,20 +35,23 @@
       </div>
       <div class="col-lg-9">
         <div class='vis' id = 'byState'>
+        <br></br><br></br>
         </div>
       </div>
     </section>
 
     <section class="step row">
       <div class="title col-lg-3" id = "commute">
-        This view shows the percentage of accdient number according to certain commute mode<br/><br/>
-        The inner circle shows<br/><br/>
+        Sedean are more likely involved in mutiple-vehicle crash, truck and van are more suspiciously for fatal single-vehicle crash because of relatively higher center of gravity(roll over).<br/><br/>
+        On the other side, the larger the average death toll per accident, the more suspiciously that a concentrated driver
+        will be involved in fatal crash due to others.<br/><br/>
+        Severe traffic crash occur more often in 10pm to 4am, especially on Sataurday and Sunday.<br/><br/>
         Move the mouse on inner circle to get more information<br/><br/>
-        The outer circle shows<br/><br/>
         Select the intrested commute mode and get more info in heatmap<br/><br/>
       </div>
       <div class="col-lg-9">
         <div class='vis' id="vis-byType">
+        <br></br>
             <div id="typeDiv">
             </div>
         </div>
@@ -59,39 +63,51 @@
 
     <section class="step row">
       <div class="title col-lg-3" id = "weather">
-        Which kind of severe weather did you encounter most often in last two weeks?<br/><br/>
+      Which kind of severe weather did you encounter most often in last two weeks?<br/><br/>
         <div id="sidebar-weather">
-            <select class= 'selectMenu' id="weatherVar" onchange="highlightLine()">
-                <option value="0" selected="selected" disabled>
-                    <!-- No Additional Atmospheric Conditions -->
-                    -- Select Weather --
-                </option>
-                <option value="1">Clear</option>
-                <option value="2">Rain</option>
-                <option value="3">Sleet, Hail</option>
-                <option value="4">Snow</option>
-                <option value="5">Fog, Smog, Smoke</option>
-                <option value="10">Cloudy</option>
-                <option value="11">Back</option>
-
-            </select>
-        </div>        
+          <select class= 'selectMenu' id="weatherVar" onchange="highlightLine()">
+              <option value="0" selected="selected" disabled>
+                  <!-- No Additional Atmospheric Conditions -->
+                  -- Select Weather --
+              </option>
+              <option value="1">Clear</option>
+              <option value="2">Rain</option>
+              <option value="3">Sleet, Hail</option>
+              <option value="4">Snow</option>
+              <option value="5">Fog, Smog, Smoke</option>
+              <option value="10">Cloudy</option>
+              <option value="11">Back</option>
+          </select>
+        </div>
+      <br></br>Be careful in Sleet, Snow and Fog weather. Generally, under these weather, there tend to be more serious traffic accidents.<br></br>
+      Also, avoid driving under rare weather in your area, due to the lack of public emergency measures.<br></br>         
       </div>
       <div class="col-lg-9" >
         <div class='vis' id="svg-weather">
+        <br></br><br></br>
         </div>
       </div>
     </section>
 
     <section class="step row" >
       <div class="title col-lg-3" id = "badBehaviour" >
-        text for bad behaviour<br/><br/>
-        <p><input type="checkbox" name="category" id="checkbox1" value="distract" checked="checked"/>  speeding</p>
-        <p><input type="checkbox" name="category" id="checkbox2" value="speeding" /> distracted</p>   
+        Will speeding and distracted make things worth? Try yourself.<br/><br/>
+        The larger the average tolls, more likely a innocent people is invloved in fatal traffic crash.<br/><br/>
+        <p><input type="checkbox" name="category" id="checkbox1" value="distract" checked="checked"/>
+          <span class = 'checkboxtext'>
+            speeding
+          </span>
+        </p>
+        <p><input type="checkbox" name="category" id="checkbox2" value="speeding" />
+          <span class = 'checkboxtext'>
+            distracted
+          </span> 
+        </p>
         <p><input id="btnOperate" type="button" value="submit" /></p>          
       </div>
       <div class="col-lg-9" >
         <div class='vis' id="behaveDiv">
+        <br></br><br></br>
         </div>
       </div>
     </section>
