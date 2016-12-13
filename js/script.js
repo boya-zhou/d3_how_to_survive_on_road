@@ -1055,7 +1055,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
 
     // Set the range
     var xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1).domain(["1","2","3","4","5","6","7"]);
-    var yScale = d3.scale.linear().range([height, 0]).domain([minValue - 0.1, maxValue + 0.3]);
+    var yScale = d3.scale.linear().range([height, 0]).domain([minValue - 0.1, maxValue + 0.1]);
 
     // Define the axis
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(formatYear);
