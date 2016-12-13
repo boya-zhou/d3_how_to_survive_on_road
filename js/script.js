@@ -936,7 +936,7 @@ function byWeather(weatherData) {
        .append("text")
        .attr("text-anchor", "middle")
        .attr("transform","translate("+ ((width + margin.left + margin.right)/2) + "," + (margin.top/2) + ")")
-       .text("Average Death Toll per Accident in Under Different Weather");
+       .text("Average Death Toll per Accident by Different Weather");
 
     svg.append("text")
        .attr("text-anchor", "middle")
