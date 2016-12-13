@@ -429,11 +429,11 @@ function byType(typeDate) {
        .attr("transform","translate("+ ((width/3) - 20) + "," + ((height/3) - 65) + ")")
        .text("Severity by Commute Mode");
 
-    // d3.select("#donut-outer")
-    //    .append("text")
-    //    .attr("text-anchor", "middle")
-    //    .attr("transform","translate("+ ((margin.left + margin.right + width)/2) + "," + (margin.top/4) + ")")
-    //    .text("Number of Accidents in Different Commute Mode");
+    d3.select("#donut-inner")
+       .append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform","translate("+ ((width)/4) + "," + (-height/2 - 10) + ")")
+       .text("Traffic Death Toll by Commute Mode");
 
     var svgHeatmap = d3.select("#typeDiv")
                        .append("svg")
