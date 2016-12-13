@@ -210,7 +210,7 @@ function byYear() {
        .append("text")
        .attr("text-anchor", "middle")
        .attr("transform","translate("+ ((width + margin.left + margin.right)/2) + "," + (margin.top/2) + ")")
-       .text("Number of Accidents in Each Year");
+       .text("Traffic Death Troll by Year");
 
     svg.append("text")
        .attr("text-anchor", "middle")
@@ -302,12 +302,12 @@ function byState(data, states, stateCode, stateAbbr) {
        .append("text")
        .attr("text-anchor", "middle")
        .attr("transform","translate("+ ((margin.left + margin.right + width)/2) + "," + (margin.top/2) + ")")
-       .text("Number of Accidents in USA States");
+       .text("Traffic Death Toll by State");
 
     svgState.append("text")
        .attr("text-anchor", "middle")
        .attr("transform","translate("+ (width/2) + "," + (height + aToA) + ")")
-       .text("USA States")
+       .text("States")
        .style("font-size","18px");
     // console.log(data);
     // update the list of array
@@ -412,22 +412,22 @@ function byType(typeDate) {
     d3.select("#donut-inner")
        .append("text")
        .attr("transform","translate("+ ((width/3) - 20) + "," + (-height/3) + ")")
-       .text("Inner Circle : Number of Accidents");
+       .text("Inner Circle : Number of Fatal Crash");
 
     d3.select("#donut-inner")
        .append("text")
        .attr("transform","translate("+ ((width/3) - 20) + "," + ((-height/3) + 25) + ")")
-       .text("in Different Commute Mode");
+       .text("by Commute Mode");
 
     d3.select("#donut-inner")
        .append("text")
        .attr("transform","translate("+ ((width/3) - 20) + "," + ((height/3) - 90) + ")")
-       .text("Outer Circle : Corresponding Death Tolls");
+       .text("Outer Circle : Corresponding Death Toll");
 
     d3.select("#donut-inner")
        .append("text")
        .attr("transform","translate("+ ((width/3) - 20) + "," + ((height/3) - 65) + ")")
-       .text("for Different Commute Mode");
+       .text("Severity by Commute Mode");
 
     // d3.select("#donut-outer")
     //    .append("text")
@@ -448,7 +448,7 @@ function byType(typeDate) {
        .attr("text-anchor", "middle")
        .attr("transform","translate("+ ((margin.left + margin.right + width)/2) +
                "," + (height + margin.top + margin.bottom) * 0.99 + ")")
-       .text("Average Death Toll per Accident in Certain Commute Related with Weekday and Time");    
+       .text("Average Death Toll per Accident in Certain Commute by Time");    
 
     var dayLabels = svgHeatmap.selectAll(".dayLabel")
                        .data(days)
@@ -936,7 +936,7 @@ function byWeather(weatherData) {
        .append("text")
        .attr("text-anchor", "middle")
        .attr("transform","translate("+ ((width + margin.left + margin.right)/2) + "," + (margin.top/2) + ")")
-       .text("Average Death Tolls per Accident in Under Different Weather");
+       .text("Average Death Toll per Accident in Under Different Weather");
 
     svg.append("text")
        .attr("text-anchor", "middle")
@@ -1074,7 +1074,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
        .append("text")
        .attr("text-anchor", "middle")
        .attr("transform","translate("+ ((width + margin.left + margin.right)/2) + "," + (margin.top/2) + ")")
-       .text("Average Death Tolls per Accident Related with Bad Driving Behaviors");
+       .text("Average Death Toll per Accident Related with Bad Driving Behaviors");
 
     svgBehave.append("text")
        .attr("text-anchor", "middle")

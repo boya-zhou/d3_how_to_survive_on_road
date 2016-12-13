@@ -5,7 +5,7 @@
 }
 
 .title {
-  font-size:23px;
+  font-size:20px;
   text-anchor: middle;
 }
 
@@ -100,7 +100,8 @@ input[type=checkbox]
     box-shadow: none;
     -webkit-appearance: none;
     border-radius: 2px;
-    margin-top: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
 }
 
 #checkbox1, #checkbox2  {

@@ -17,7 +17,7 @@
 
     <section class="step row">
       <div class="title col-lg-3">
-        In recent years, many safety actions helped decrease the number of traffic deaths.<br/><br/> However, newly released government data points that the number of people who died in car accidents increase 7.2% over 2015.<br/><br/> Thus, this website will show some traffic accident information in 2015. Hope it will help you increase more vigilance.
+        In recent years, many safety actions have helped decrease the traffic toll.<br/><br/> However, newly released government data indicates that the number of people died in car accidents increased 7.2% over 2015.<br/><br/> Thus, this website will show some fatal crash information in 2015. Hope you will be more alarmed.
       </div>
       <div class="col-lg-9">
         <div class='vis' id="vis-byYear">
@@ -29,9 +29,9 @@
 
     <section class="step row">
       <div class="title col-lg-3" id = "state">
-        The number of traffic accidents distributed quite nonuniform in all states in USA. <br/><br/>
-        If you care the data in whole USA, there is no need select any option.<br/>
-        <br/>Instead, if you care more about a specific state, choose the state in following box.<br/><br/>
+        The total traffic crash fatilities distributed quite nonuniform by USA states. <br/><br/>
+        If you care the nationwide data, there is no need select any option.<br/>
+        <br/>Instead, if you care more about a specific state, choose the state in the following box.<br/><br/>
       </div>
       <div class="col-lg-9">
         <div class='vis' id = 'byState'>
@@ -42,12 +42,11 @@
 
     <section class="step row">
       <div class="title col-lg-3" id = "commute">
-        Sedean are more likely involved in mutiple-vehicle crash, truck and van are more suspiciously for fatal single-vehicle crash because of relatively higher center of gravity(roll over).<br/><br/>
-        On the other side, the larger the average death toll per accident, the more suspiciously that a concentrated driver
-        will be involved in fatal crash due to others.<br/><br/>
-        Severe traffic crash occur more often in 10pm to 4am, especially on Sataurday and Sunday.<br/><br/>
-        Move the mouse on inner circle to get more information<br/><br/>
-        Select the intrested commute mode and get more info in heatmap<br/><br/>
+        Small cars including Sedan tend to crumple when impacted violently. Larger cars such as van can affect the amount of collateral damage that occurs in a crash. <br/><br/>
+        However, truck and van are more suspiciously for fatal single-vehicle crash because of relatively higher center of gravity (roll over).<br/><br/>
+        Severe traffic crashes occur more often during 11pm to 4am, especially on Friday, Sataurday and Sunday.<br/><br/>
+        Move the mouse on inner circle to get more information.<br/><br/>
+        Select the interested commute mode and get more info in heatmap.<br/><br/>
       </div>
       <div class="col-lg-9">
         <div class='vis' id="vis-byType">
@@ -63,7 +62,7 @@
 
     <section class="step row">
       <div class="title col-lg-3" id = "weather">
-      Which kind of severe weather did you encounter most often in last two weeks?<br/><br/>
+      Which kind of weather did you encounter in last two weeks?<br/><br/>
         <div id="sidebar-weather">
           <select class= 'selectMenu' id="weatherVar" onchange="highlightLine()">
               <option value="0" selected="selected" disabled>
@@ -79,8 +78,8 @@
               <option value="11">Back</option>
           </select>
         </div>
-      <br></br>Be careful in Sleet, Snow and Fog weather. Generally, under these weather, there tend to be more serious traffic accidents.<br></br>
-      Also, avoid driving under rare weather in your area, due to the lack of public emergency measures.<br></br>         
+      <br></br>Bad weather conditions often result in low visibility and slippery roads. Snow, ice, rain, fog, and smog are just some of the conditions that can quickly turn an otherwise safe road into a hazardous one.<br></br>
+      Avoid driving under unusual weather in your area, due to the lack of public emergency measures.<br></br>         
       </div>
       <div class="col-lg-9" >
         <div class='vis' id="svg-weather">
@@ -92,7 +91,6 @@
     <section class="step row" >
       <div class="title col-lg-3" id = "badBehaviour" >
         Will speeding and distracted make things worth? Try yourself.<br/><br/>
-        The larger the average tolls, more likely a innocent people is invloved in fatal traffic crash.<br/><br/>
         <p><input type="checkbox" name="category" id="checkbox1" value="distract" checked="checked"/>
           <span class = 'checkboxtext'>
             speeding
@@ -103,7 +101,9 @@
             distracted
           </span> 
         </p>
-        <p><input id="btnOperate" type="button" value="submit" /></p>          
+        <p><input id="btnOperate" type="button" value="submit" /></p>
+        At high speed, one wrong turn of the wheel or one slower car in front of another faster one can set off a chain reaction of bent steel, broken glass, and serious injuries.<br/><br/>
+        When driver are distracted, like playing cell phones or falling asleep, the car will turn in driveless state. It only takes a second for a driverless car drift into another lane, careen off the road, or plow into the car in front.             
       </div>
       <div class="col-lg-9" >
         <div class='vis' id="behaveDiv">
@@ -113,19 +113,16 @@
     </section>
 
     <section class="step row">
-      <div class="title col-lg-3" id = "end" >
-        text for end<br/><br/>
-      </div>
-      <div class="col-lg-9">
-        <div class='vis'>
-        </div>
+      <div class="title" id = "end" >
+        <br></br>
+        <br></br>
+        <br></br>
+        Reference:<br></br>
+        http://www.injuryclaimcoach.com/multi-vehicle-accident.html<br></br>
+        http://www.ohiotiger.com/suvs-vs-cars-crash-survival/<br></br>
+        http://journalistsresource.org/studies/environment/transportation/comparing-fatality-risks-united-states-transportation-across-modes-time<br></br>
       </div>
     </section>
-    
-    <div id="extra-space">
-    </div>
-
-
 </div>
 <script src="js/jquery-3.1.1.js"></script>
 <script src="https://d3js.org/d3.v3.min.js"></script>
