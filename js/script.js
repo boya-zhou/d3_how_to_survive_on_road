@@ -45,13 +45,28 @@ $(document).ready(function() {
         byWeather(data);
         byBehave(behave1=1, behave2=0, behaveData=data);
 
+        d3.select('#state')
+              .append('div')
+              .attr('id','divider');
+
         d3.select("#state-select").on("change", changeState);
         function changeState() {
             // remove states that did not appear
             // adjust the scale
+
             var stateScale = d3.scale.ordinal().domain(states).range(stateCode);
             var selectedState = stateScale(d3.select('#state-select').property('value'));
             var stateResult = dataNestState.filter(function(d) { return d.key == selectedState; })[0].values;
+
+            var stateValue = d3.select('#state-select').property('value');
+
+            $("#text-state-info").remove();
+
+            d3.select('#state')
+              .append('text')
+              .attr('class','title')
+              .attr('id','text-state-info')
+              .text('The following views will show info in ' + stateValue + '.')
 
             // Select type
             var dataNestType = d3.nest()
@@ -63,20 +78,17 @@ $(document).ready(function() {
                 modeChosen.push(d.key);
             });
 
-            // console.log(modeChosen);
-
             $("option[value='-- Select Weather --']")
               .attr("disabled", "disabled");
 
             $("option[value='0']")
               .siblings().removeAttr("disabled");
 
-            var modeDiff = ["0", "1", "2", "3", "4", "5", "6", "7"].diff(modeChosen);
+            var modeDiff = ["0", "1", "2", "3", "4", "5", "6"].diff(modeChosen);
             
             modeDiff.forEach(function(d){
                   $("option[value=" + d + "]")
                     .attr("disabled", "disabled");
-                    // console.log('trigger');
             });
 
             d3.select("#byTypePie").remove();
@@ -85,11 +97,12 @@ $(document).ready(function() {
             byType(stateResult);
             d3.select("#commute-select").on("change", changeType);
 
+            d3.selectAll('.state-rect').style('fill','#2196F3');
+            d3.select('#state-rect-' + selectedState).transition().duration(750).style('fill','#FFC107');
+
             function changeType() {
 
                 function highlightType(index) {
-                    console.log(index);
-
                     var blurList =  [0,1,2,3,4,5];
 
                     if (index == 7) {
@@ -140,8 +153,7 @@ $(document).ready(function() {
 
                 // var typeResult = dataNestType.filter(function(d) { return d.key == selectType; })[0].values;
                 highlightType(selectType);
-                $("option[value='7']")
-                  .removeAttr("disabled");
+
               };
 
             // Select weather
@@ -297,6 +309,7 @@ function byState(data, states, stateCode, stateAbbr) {
     var xScale = d3.scale.ordinal()
                          .domain(stateAbbr)
                          .rangeRoundBands([0, width]);
+
     var yScale = d3.scale.linear().domain([0, maxValue + 500]).range([height, 0]);
 
     var xAxis = d3.svg.axis()
@@ -322,7 +335,9 @@ function byState(data, states, stateCode, stateAbbr) {
     svgState.selectAll("bar")
         .data(modeToUseNest)
         .enter().append("rect")
-        .style("fill", "steelblue")
+        .style("fill", "#2196F3")
+        .attr('id',function(d,i){return 'state-rect-' + stateCode[i];})
+        .attr('class','state-rect')
         .attr("x", function(d,i) { return xScale(stateAbbr[i]) + 1; })
         .attr("width", xScale.rangeBand() - 1)
         .attr("y", function(d) { return yScale(d.values); })
@@ -341,9 +356,11 @@ function byType(typeDate) {
         gridSize = Math.floor(width / 24),
         legendElementWidth = (gridSize * 24) /10,
         buckets = 10,
-        colors = ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58", "#000000"], // alternatively colorbrewer.YlGnBu[9]
-        colorsPie = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6"],
-        colorsFatal = ["#c7e9b4", "#41b6c4", "#081d58"],
+        colors = ['#CCFF90','#F4FF81','#B2FF59','#EEFF41','#76FF03',"#FFCDD2","#E57373","#F44336","#D32F2F", "#B71C1C"], // alternatively colorbrewer.YlGnBu[9]
+        colorsPie = ['#2196F3','#795548', '#9C27B0','#FFC107','#009688','#607D8B'],
+        // colorsPie = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6"],
+        colorsFatal = ["#FFEBEE", "#FF8A80", "#D50000"],
+        // colorsFatal = ["#c7e9b4", "#41b6c4", "#081d58"],
         days = ["Mon", "Tus", "Wed", "Thu", "Fri", "Sat", "Sun"],
         times = ["1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12a", "1p", "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p", "10p", "11p", "12p"],
         vehicleType = ["Sedan/Hardtop/2-Door Coupe", "Utility", "Van", "Light Vehicle", "Other", "Truck"],
@@ -634,18 +651,19 @@ function byType(typeDate) {
 				                       'Van',
 					                     'Light Vehicle',
 					                     'Other',
-					                     'Truck'];
+					                     'Truck',
+                               'Back'];
     		    var commuteState = d3.select('#commute-select').property('value');
-    		    var index = commuteMode.indexOf(commuteState);
     		    // console.log(index);
-    		    highlightType(index);
+    		    highlightType(commuteState);
 	      };
 
         function highlightType(index) {
+            // console.log(index);
 
             var blurList =  [0,1,2,3,4,5];
 
-            if (index == 0) {
+            if (index == 7) {
         
                 // Dealing with pie
                 d3.selectAll(".arcsType")
@@ -807,6 +825,12 @@ function byWeather(weatherData) {
       }
     });
 
+    var keyList = [];
+    dataNest.forEach(function(d, i){
+        keyList.splice(i, 0, d.key);
+    });
+    // console.log(keyList);
+
     var xScale = d3.scale.linear()
                           .domain([0, 24])
                           .range([0, width]);
@@ -825,8 +849,11 @@ function byWeather(weatherData) {
                              .orient("left")
                              .tickValues(avgL);
 
-    var color = d3.scale.category20();
+    var color = d3.scale.ordinal()
+                        .range(['#2196F3','#795548', '#9C27B0','#FFC107','#009688','#607D8B'])
+                        .domain(keyList);
 
+    console.log(color('1'));
     var svg = d3.select("#svg-weather")
                 .append("svg")
                 .attr("id", "byWeather")
@@ -937,6 +964,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
         maxValueL2.push(d.values);
     });
     var maxValue = d3.max(maxValueL.concat(maxValueL2));
+    var minValue = d3.min(maxValueL.concat(maxValueL2));
 
     // Define the scales
     var timeFormat = d3.time.format('%a'),
@@ -944,7 +972,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
 
     // Set the range
     var xScale = d3.scale.ordinal().rangeRoundBands([0, width], .1).domain(["1","2","3","4","5","6","7"]);
-    var yScale = d3.scale.linear().range([height, 0]).domain([-.1, maxValue + 0.3]);
+    var yScale = d3.scale.linear().range([height, 0]).domain([minValue - 0.1, maxValue + 0.3]);
 
     // Define the axis
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(formatYear);
@@ -978,7 +1006,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
              .attr("y", function(d) { return yScale(d.values); })
              .attr("width", xScale.rangeBand())
              .attr("height", function(d) { return height - yScale(d.values); })
-             .style("fill", "#999999");
+             .style("fill", "#D50000");
 
     svgBehave.selectAll(".bar-behave-default")
              .data(behaveDataNestDefault)
@@ -989,7 +1017,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
              .attr("y", function(d) { return yScale(d.values); })
              .attr("width", xScale.rangeBand())
              .attr("height", function(d) { return height - yScale(d.values); })
-             .style("fill", "#1abc9c");
+             .style("fill", "#FFCDD2");
 
     // Add the Y Axis
     svgBehave.append("g")
@@ -1001,11 +1029,6 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
              .attr("class", "axis")
              .attr("id", "be-y-axis")
              .call(yAxis);
-
-    // svgBehave.append("text")
-    //          .attr("x", 10)
-    //          .attr("y", 10)
-    //          .text("Average Death per Accident");
 
     d3.select("#btnOperate")
       .on("click", clickSubmit);
@@ -1034,6 +1057,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
             maxValueL2.push(d.values);
         });
         var maxValue = d3.max(maxValueL.concat(maxValueL2));
+        var minValue = d3.min(maxValueL.concat(maxValueL2));
 
         var weekday = [];
         dataChosenBe.forEach(function(d){
@@ -1046,7 +1070,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
         });
         // console.log(dataChosenBe);
 
-        yScale.domain([0, maxValue + 0.3]);
+        yScale.domain([minValue - 0.1, maxValue + 0.1]);
         var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(6);
 
         d3.selectAll(".bar-behave-chosen")
@@ -1057,7 +1081,7 @@ function byBehave(behave1 = 1, behave2 = 0, behaveData) {
           .attr("y", function(d) { return yScale(d.values); })
           .attr("width", xScale.rangeBand())
           .attr("height", function(d) { return height - yScale(d.values); })
-          .style("fill", "#999999")
+          .style("fill", "#D50000")
         
         d3.select('#be-y-axis')
           .call(yAxis);

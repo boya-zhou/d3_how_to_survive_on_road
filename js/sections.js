@@ -20,6 +20,7 @@ function selectMenu(){
 		.attr('value',function(d){return d;})
 		.text(function(d) {return d;});
 
+
 	// function stateChange(){
 	// 	var selectState = d3.select('#state-select').property('value');
 	// 	return selectState;
@@ -51,9 +52,6 @@ function selectMenu(){
 		.text(function(d) { return d; });
 	
 	$("option[value='0']")
-	  .attr("disabled", "disabled");
-
-	$("option[value='7']")
 	  .attr("disabled", "disabled");
 
 	d3.select("#weatherVar")

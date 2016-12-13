@@ -4,13 +4,19 @@
   margin: 0 auto;
 }
 
+.title {
+  font-size:23px;
+  text-anchor: middle;
+}
+
 #main-title {
   position: relative;
   width: 350px;
   top: 80px;
   z-index: 90;
-  font-size: 48px;
+  font-size: 55px;
   color: black;
+  line-height: 60%;
   margin-bottom: 400px;
 }
 
@@ -21,7 +27,7 @@
 .step {
   margin-bottom: 300px;
   font-family: "TiemposTextWeb-Regular","Georgia";
-  font-size: 18px;
+  font-size: 20px;
   line-height: 25px;
   color: black;
 }
@@ -46,7 +52,27 @@
     background: transparent;
     background-image: none;
     -webkit-appearance: none;
+    border-radius: 2px;
 }
+
+#divider{
+    width:5px;
+    height:auto;
+    display:inline-block;
+    width : 100%;
+}
+
+#state-back {
+    padding-top: 20px;
+    padding: 5px 8px;
+    width : 80%;
+    background: rgba(0,0,0,0);
+    border: 2px solid #ccc;
+    box-shadow: none;
+    -webkit-appearance: none;
+    border-radius: 2px;
+    text-align: left;  
+} 
 
 #btnOperate {
     padding: 5px 8px;
@@ -54,6 +80,8 @@
     background: rgba(0,0,0,0);
     border: 2px solid #ccc;
     box-shadow: none;
+    -webkit-appearance: none;
+    border-radius: 2px;
 }
 
 #checkbox1, #checkbox2  {
@@ -68,11 +96,6 @@
   height: 700px;
   z-index: 1;
   margin-left: 40;
-}
-
-.vis .title {
-  font-size:120px;
-  text-anchor: middle;
 }
 
 .tooltip-type {
