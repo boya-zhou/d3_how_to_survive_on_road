@@ -1,5 +1,11 @@
 Final Project - Interactive Data Visualization  
 ===
+### Team
+
+- Boya Zhou (bzhou@wpi.edu, github: boyazhou1993) 
+- Caidan Liu (cliu7@wpi.edu, github: CaidanLiu2) 
+- Yuting Liang (yliang3@wpi.edu, github: DarienLiang)
+
 ### Project Website
 
 Adjust the screen resolution to get more comfortable layout.
