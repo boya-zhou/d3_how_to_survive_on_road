@@ -2,11 +2,10 @@ Final Project - Interactive Data Visualization
 ===
 ### Project Website
 
-[Link to Project]()
+[Link to Project](https://boyazhou1993.github.io/DataVisFinal/index.html)
 
 ### Process Book
 
-As this will be your only chance to describe your project in detail make sure that your process book is a standalone document that fully describes your results and the final design. 
 [Link to Process Book](https://github.com/boyazhou1993/DataVisFinal/blob/master/ProcessBook.pdf) 
 
 ### Project Screen-Cast
@@ -17,12 +16,12 @@ As this will be your only chance to describe your project in detail make sure th
 
 Yuting Liang(DarienLiang): 
 
-    - majority process data, make 1st,3rd,4nd,5nd views, with transitions, and 50% logic functions
+    - majority process data in python and d3, make 1st, 3rd, 4nd, 5nd views with transitions, change data flow, and 50% logic functions
     - part of process book, video
 
 Boya Zhou(boyazhou1993):
 
-    - make 2nd view, layout, (based on yuting's work)test and add other 50% logic functions, part modify data in d3, style(color, axis)
+    - make 2nd view, layout, unify views format, (based on yuting's work)test website, add 50% logic functions, part modify data in d3, css style
     - part of process book, video
 
 Caidan Liu(CaidanLiu2):
