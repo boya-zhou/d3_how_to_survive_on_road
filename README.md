@@ -3,6 +3,7 @@ Final Project - Interactive Data Visualization
 ### Project Website
 
 Adjust the screen resolution to get more comfortable layout.
+
 [Link to Project](https://boyazhou1993.github.io/DataVisFinal/index.html)
 
 ### Process Book
