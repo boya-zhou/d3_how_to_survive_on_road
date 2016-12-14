@@ -16,12 +16,17 @@ As this will be your only chance to describe your project in detail make sure th
 ### Contribution
 
 Yuting Liang(DarienLiang): 
+
     - majority process data, make 1st,3rd,4nd,5nd views, with transitions, and 50% logic functions
     - part of process book, video
+
 Boya Zhou(boyazhou1993):
+
     - make 2nd view, layout, (based on yuting's work)test and add other 50% logic functions, part modify data in d3, style(color, axis)
     - part of process book, video
+
 Caidan Liu(CaidanLiu2):
+
     - part of process data
     - part of process book, video
 
