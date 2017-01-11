@@ -39,18 +39,18 @@ Process book is too long, simple guideline here:
 
 Yuting Liang(DarienLiang): 
 
-    - majority process data in python and d3, make 1st, 3rd, 4nd, 5nd views with transitions, change data flow, and 50% logic functions
-    - part of process book, video
+- majority process data in python and d3, make 1st, 3rd, 4nd, 5nd views with transitions, change data flow, and 50% logic functions
+- part of process book, video
 
 Boya Zhou(boyazhou1993):
 
-    - make 2nd view, website layout, unify views format, (based on yuting's work)test website, add 50% logic functions, part modify data in d3, css style
-    - part of process book, video
+- make 2nd view, website layout, unify views format, (based on yuting's work)test website, add 50% logic functions, part modify data in d3, css style
+- part of process book, video
 
 Caidan Liu(CaidanLiu2):
 
-    - part of process data
-    - part of process book, video
+- part of process data
+- part of process book, video
 
 ### Library
 - d3: in js file
