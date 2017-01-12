@@ -14,7 +14,7 @@ Adjust the screen resolution to get more comfortable layout.
 
 ### Process Book
 
-[Link to Process Book](https://github.com/boyazhou1993/d3_how_to_survive_on_road/ProcessBook.pdf) 
+[Link to Process Book](https://github.com/boyazhou1993/d3_how_to_survive_on_road/blob/master/ProcessBook.pdf) 
 
 ### Guide to Process Book
 
@@ -32,7 +32,7 @@ Process book is too long, simple guideline here:
 
 ### Project Screen-Cast
 
-[Link to Screen-Cast](https://github.com/boyazhou1993/d3_how_to_survive_on_road/dataVisFinal_Yuting_Boya_Caidan.mp4)
+[Link to Screen-Cast](https://github.com/boyazhou1993/d3_how_to_survive_on_road/blob/master/dataVisFinal_Yuting_Boya_Caidan.mp4)
 
 
 ### Contribution
