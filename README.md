@@ -10,11 +10,11 @@ Final Project - Interactive Data Visualization
 
 Adjust the screen resolution to get more comfortable layout.
 
-[Link to Project](https://boyazhou1993.github.io/DataVisFinal/index.html)
+[Link to Project](https://boyazhou1993.github.io/d3_how_to_survive_on_road/index.html)
 
 ### Process Book
 
-[Link to Process Book](https://github.com/boyazhou1993/DataVisFinal/blob/master/ProcessBook.pdf) 
+[Link to Process Book](https://github.com/boyazhou1993/d3_how_to_survive_on_road/ProcessBook.pdf) 
 
 ### Guide to Process Book
 
@@ -32,7 +32,7 @@ Process book is too long, simple guideline here:
 
 ### Project Screen-Cast
 
-[Link to Screen-Cast](https://github.com/boyazhou1993/DataVisFinal/blob/master/dataVisFinal_Yuting_Boya_Caidan.mp4)
+[Link to Screen-Cast](https://github.com/boyazhou1993/d3_how_to_survive_on_road/dataVisFinal_Yuting_Boya_Caidan.mp4)
 
 
 ### Contribution
