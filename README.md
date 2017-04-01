@@ -10,7 +10,7 @@ Final Project - Interactive Data Visualization
 
 Adjust the screen resolution to get more comfortable layout.
 
-[Link to Project](https://boyazhou1993.github.io/d3_how_to_survive_on_road/index.html)
+[Link to Project](https://boya-zhou.github.io/d3_how_to_survive_on_road/index.html)
 
 ### Process Book
 
